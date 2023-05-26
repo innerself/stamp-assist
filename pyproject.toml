@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "stamp-assist"
+version = "0.1.0"
+description = ""
+authors = ["Sergey Petrin"]
+readme = "README.md"
+packages = [{include = "stamp_assist"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^4.2.1"
+django-environ = "^0.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
