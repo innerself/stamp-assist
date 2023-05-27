@@ -1,15 +1,22 @@
+import datetime
+import io
 import itertools
 from decimal import Decimal
+from pathlib import Path
 
+import requests
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, User
+from django.core.files.images import ImageFile
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
 class Desk(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='desk', on_delete=models.CASCADE)
+
 
 
 class StampCollection(models.Model):
@@ -45,10 +52,48 @@ class StampCollection(models.Model):
         return f'{self.user} stamps collection'
 
 
-class Stamp(models.Model):
-    name = models.CharField(max_length=255, null=True, blank=True)
+class StampSampleManager(models.Manager):
+    def from_colnect(self, url: str):
+        """Create an instance from colnect.com URL."""
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/104.0.5112.79 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        image_url = f"https:{soup.find('div', {'class': 'item_z_pic'}).img['src']}"
+        response = requests.get(image_url, headers=headers)
+
+        return self.create(
+            name=soup.find('span', id='name').string,
+            year=datetime.date.fromisoformat(soup.find('dd', {'itemprop': 'releaseDate'}).text).year,
+            country=soup.find('dt', string='Страна:').next_sibling.text.strip(),
+            value=int(soup.find('dt', string='Номинальная стоимость:').next_sibling.next_element.text),
+            michel_number=soup.find('strong', string='Михель').next_sibling.text.strip(),
+            image=ImageFile(io.BytesIO(response.content), Path(image_url).name),
+        )
+
+
+class StampSample(models.Model):
+    name = models.CharField(max_length=255)
+    year = models.PositiveSmallIntegerField()
+    country = models.CharField(max_length=255)
     value = models.DecimalField(max_digits=10, decimal_places=2)
-    topic = models.CharField(max_length=255, null=True, blank=True)
+    width = models.PositiveSmallIntegerField(null=True)
+    height = models.PositiveSmallIntegerField(null=True)
+    topics = models.JSONField(default=list)
+    michel_number = models.CharField(max_length=255, null=True, blank=True)
+    image = models.ImageField(upload_to='upload/', null=True)
+
+    objects = StampSampleManager()
+
+    def __str__(self):
+        return f'{self.name} ({self.value}, {self.year})'
+
+
+class Stamp(models.Model):
     desk = models.ForeignKey(Desk, on_delete=models.PROTECT, null=True)
 
     def __add__(self, other) -> Decimal:
@@ -73,17 +118,18 @@ class Stamp(models.Model):
             return f'Stamp id={self.id} value={self.value}'
 
 
-class StampBlock(models.Model):
-    stamp = models.ForeignKey(Stamp, on_delete=models.CASCADE)
-    number = models.IntegerField(default=1)
-    collection = models.ForeignKey(StampCollection, related_name='blocks', on_delete=models.CASCADE)
+class UserStamp(models.Model):
+    sample = models.ForeignKey(StampSample, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=255)
+    quantity = models.PositiveSmallIntegerField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    desk = models.ForeignKey(Desk, related_name='user_stamps', on_delete=models.PROTECT, null=True)
 
-    def __str__(self):
-        return f'Stamp block {self.stamp} ({self.number} stamps)'
+    class Meta:
+        unique_together = ('sample', 'user')
 
 
 @receiver(post_save, sender=User)
 def desk_create(sender, instance=None, created=False, **kwargs):
     if created:
         Desk.objects.create(user=instance)
-

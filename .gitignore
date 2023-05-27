@@ -15,3 +15,5 @@ media
 /.env
 /.idea
 
+/.pytest_cache/
+/upload/

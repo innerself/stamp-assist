@@ -10,6 +10,14 @@ packages = [{include = "stamp_assist"}]
 python = "^3.11"
 django = "^4.2.1"
 django-environ = "^0.10.0"
+pytest-django = "^4.5.2"
+beautifulsoup4 = "^4.12.2"
+requests = "^2.31.0"
+pillow = "^9.5.0"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "stamp_assist.settings"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
 
 
 [build-system]

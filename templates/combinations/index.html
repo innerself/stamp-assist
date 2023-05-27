@@ -20,11 +20,11 @@
   <div class="empty-zone-left"></div>
   <div class="stamps-cell">
   {% for sblock in stamp_collection.blocks.all %}
-      <div class="stamp-block" id="{{ sblock.stamp.id }}">
+      <div class="stamp-block" id="{{ sblock.id }}">
         <b>Value:</b> {{ sblock.stamp.value }} <b>Count:</b> {{ sblock.number }}
         <form method="post">
           {% csrf_token %}
-          <button class="button-use" type="submit" value="{{ sblock.stamp.value }}" name="use-value">Use</button>
+          <button class="button-use" type="submit" value="{{ sblock.id }}" name="use-block">Use</button>
         </form>
       </div>
   {% endfor %}

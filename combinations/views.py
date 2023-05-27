@@ -4,13 +4,13 @@ from django.shortcuts import render
 
 from accounts.models import User
 from .forms import CalcConfigForm
-from .models import StampCollection
+from .models import  StampCollection
 
 
 def root_view(request):
     curr_user = User.objects.get(username='tyrel')
-    stamp_collection = StampCollection.objects.get(user=curr_user)
-
+    # stamp_collection = StampCollection.objects.get(user=curr_user)
+    #
     if request.method == 'POST':
         if all(field in request.POST.keys() for field in CalcConfigForm.declared_fields):
             new_settings = {
@@ -21,15 +21,17 @@ def root_view(request):
 
             curr_user.calc_settings = new_settings
             curr_user.save()
+        # if block_id := request.POST.get('use-block'):
+        #     block = StampBlock.objects.get(id=block_id)
 
-    combs = stamp_collection.combinations()
+    # combs = stamp_collection.combinations()
 
     curr_user.refresh_from_db()
     form = CalcConfigForm(initial=curr_user.calc_settings)
 
     context = {
         'form': form,
-        'stamp_collection': stamp_collection,
-        'combs': combs,
+        # 'stamp_collection': stamp_collection,
+        # 'combs': combs,
     }
     return render(request, 'combinations/index.html', context)
