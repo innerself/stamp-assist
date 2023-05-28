@@ -14,6 +14,8 @@ pytest-django = "^4.5.2"
 beautifulsoup4 = "^4.12.2"
 requests = "^2.31.0"
 pillow = "^9.5.0"
+imagekitio = "^3.0.1"
+urllib3 = "1.26.16"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "stamp_assist.settings"

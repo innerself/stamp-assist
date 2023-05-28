@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<ul>
+{% for sample in stampsample_list %}
+  <li>
+  <h4>{{ sample.name }}</h4>
+  <p>Value: {{ sample.value }}</p>
+  <p><img src="{{ sample.image }}"></p>
+  </li>
+{% empty %}
+  <li>No samples added</li>
+{% endfor %}
+</ul>
+</body>
+</html>

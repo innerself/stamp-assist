@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,9 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, 'some-key'),
-    ALLOWED_HOSTS=(str, '*')
+    ALLOWED_HOSTS=(str, '*'),
+    IMAGE_KIT_PRIVATE_KEY=(str, 'some-key'),
+    IMAGE_KIT_PUBLIC_KEY=(str, 'some-key'),
+    IMAGE_KIT_ENDPOINT=(str, 'some-endpoint'),
 )
-
+env.read_env(BASE_DIR.joinpath('.env'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 

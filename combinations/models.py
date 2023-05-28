@@ -12,6 +12,16 @@ from django.core.files.images import ImageFile
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from imagekitio import ImageKit
+from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
+
+from stamp_assist.settings import env
+
+imagekit = ImageKit(
+    private_key=env('IMAGE_KIT_PRIVATE_KEY'),
+    public_key=env('IMAGE_KIT_PUBLIC_KEY'),
+    url_endpoint=env('IMAGE_KIT_ENDPOINT'),
+)
 
 
 class Desk(models.Model):
@@ -64,15 +74,20 @@ class StampSampleManager(models.Manager):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         image_url = f"https:{soup.find('div', {'class': 'item_z_pic'}).img['src']}"
-        response = requests.get(image_url, headers=headers)
+        ik_options = UploadFileRequestOptions(folder='/stamp-assist/')
+        ik_image = imagekit.upload_file(
+            image_url,
+            file_name=Path(image_url).name,
+            options=ik_options,
+        )
 
         return self.create(
             name=soup.find('span', id='name').string,
-            year=datetime.date.fromisoformat(soup.find('dd', {'itemprop': 'releaseDate'}).text).year,
+            year=datetime.date.fromisoformat(soup.find('dt', string='Дата выпуска:').next_sibling.text.strip()).year,
             country=soup.find('dt', string='Страна:').next_sibling.text.strip(),
             value=int(soup.find('dt', string='Номинальная стоимость:').next_sibling.next_element.text),
             michel_number=soup.find('strong', string='Михель').next_sibling.text.strip(),
-            image=ImageFile(io.BytesIO(response.content), Path(image_url).name),
+            image=ik_image.url,
         )
 
 
@@ -85,7 +100,7 @@ class StampSample(models.Model):
     height = models.PositiveSmallIntegerField(null=True)
     topics = models.JSONField(default=list)
     michel_number = models.CharField(max_length=255, null=True, blank=True)
-    image = models.ImageField(upload_to='upload/', null=True)
+    image = models.URLField(null=True)
 
     objects = StampSampleManager()
 
