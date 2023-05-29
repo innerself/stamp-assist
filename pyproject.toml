@@ -3,7 +3,6 @@ name = "stamp-assist"
 version = "0.1.0"
 description = ""
 authors = ["Sergey Petrin"]
-readme = "README.md"
 packages = [{include = "stamp_assist"}]
 
 [tool.poetry.dependencies]

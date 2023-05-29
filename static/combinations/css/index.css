@@ -40,3 +40,17 @@
   grid-column: 1 / -1;
 }
 
+.sample-cards {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -0.25rem;
+  margin-right: -0.25rem;
+}
+
+.sample-cards__item {
+  flex-basis: 400px;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+

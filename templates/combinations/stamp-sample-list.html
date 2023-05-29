@@ -1,20 +1,29 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <link rel="stylesheet" href="{% static 'combinations/css/index.css' %}" type="text/css">
 </head>
 <body>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Save">
+</form>
+<div class="sample-cards">
+  {% for sample in stampsample_list %}
+    <div class="sample-cards__item">
+      <h4>{{ sample.name }}</h4>
+      <p>Value: {{ sample.value }}</p>
+      <p><img src="{{ sample.image }}"></p>
+    </div>
+  {% empty %}
+    <p>No samples added</p>
+  {% endfor %}
+</div>
 <ul>
-{% for sample in stampsample_list %}
-  <li>
-  <h4>{{ sample.name }}</h4>
-  <p>Value: {{ sample.value }}</p>
-  <p><img src="{{ sample.image }}"></p>
-  </li>
-{% empty %}
-  <li>No samples added</li>
-{% endfor %}
 </ul>
 </body>
 </html>
