@@ -1,3 +1,33 @@
+.main-wrapper {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-gap: 2em;
+}
+
+.stamps-column {
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto;
+  grid-gap: 2em;
+}
+
+.stamp-cell {
+
+}
+
+.edit-column {
+  grid-column: 2;
+  display: grid;
+  grid-template-rows: repeat(4, min-content);
+}
+
+.add-cell {
+  grid-row: 1;
+}
+
+
 .stamps-quantity {
   font-size: xxx-large;
 }
