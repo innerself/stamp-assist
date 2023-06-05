@@ -1,3 +1,4 @@
+import time
 from decimal import Decimal
 
 from django.http import HttpResponseRedirect
@@ -5,11 +6,10 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView, ListView
+from django.views.generic import FormView, ListView
 
-from accounts.models import User
-from .forms import CalcConfigForm, ColnectCreateForm
-from .models import StampCollection, StampSample
+from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm
+from .models import StampSample, UserStamp
 
 
 def root_view(request):
@@ -37,12 +37,6 @@ def root_view(request):
     return render(request, 'combinations/index.html', context)
 
 
-class StampSampleCreateView(CreateView):
-    model = StampSample
-    fields = '__all__'
-    template_name = 'combinations/stamp-sample-create.html'
-
-
 class StampSampleListView(ListView):
     model = StampSample
     template_name = 'combinations/stamp-sample-list.html'
@@ -59,9 +53,10 @@ def samples_create_from_colnect_view(request):
         form = ColnectCreateForm(request.POST)
         if form.is_valid():
             for url in form.cleaned_data['urls'].split('\n'):
-                StampSample.objects.from_colnect(url)
+                StampSample.objects.from_colnect(url.strip())
+                time.sleep(5)
 
-    return HttpResponseRedirect(reverse('combinations:samples-colnect'))
+    return HttpResponseRedirect(reverse('combinations:samples'))
 
 
 class StampSampleColnectView(View):
@@ -71,4 +66,41 @@ class StampSampleColnectView(View):
 
     def post(self, request, *args, **kwargs):
         view = samples_create_from_colnect_view
+        return view(request, *args, **kwargs)
+
+
+class UserStampListView(ListView):
+    model = UserStamp
+    template_name = 'combinations/user-stamp-list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_create'] = UserStampCreateForm()
+        return context
+
+
+class UserStampCreateView(FormView):
+    model = UserStamp
+    form_class = UserStampCreateForm
+    template_name = 'combinations/user-stamp-list.html'
+
+    def get_success_url(self):
+        return reverse('combinations:user-stamps')
+
+    def post(self, request, *args, **kwargs):
+        form = UserStampCreateForm(request.POST)
+        if form.is_valid():
+            form.cleaned_data['user'] = self.request.user
+
+        UserStamp.objects.create(**form.cleaned_data)
+        return super().post(request, *args, **kwargs)
+
+
+class UserStampView(View):
+    def get(self, request, *args, **kwargs):
+        view = UserStampListView.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        view = UserStampCreateView.as_view()
         return view(request, *args, **kwargs)

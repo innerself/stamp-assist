@@ -135,7 +135,7 @@ class Stamp(models.Model):
 
 class UserStamp(models.Model):
     sample = models.ForeignKey(StampSample, on_delete=models.CASCADE)
-    comment = models.CharField(max_length=255)
+    comment = models.CharField(max_length=255, null=True, blank=True)
     quantity = models.PositiveSmallIntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     desk = models.ForeignKey(Desk, related_name='user_stamps', on_delete=models.PROTECT, null=True)

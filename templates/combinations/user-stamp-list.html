@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block extrahead %}
+  <link rel="stylesheet" type="text/css" href="{% static 'combinations/css/user-stamp-list.css' %}">
+{% endblock extrahead %}
+{% block main %}
+  {% for userstamp in userstamp_list %}
+    <h3>{{ userstamp.sample.name }}</h3>
+    <img src="{{ userstamp.sample.image }}">
+    <span class="stamps-quantity">&times;{{ userstamp.quantity }}</span>
+    Value: {{ userstamp.sample.value }}
+  {% empty %}
+    <p>User has no stamps added</p>
+  {% endfor %}
+  <br/>
+  <form method="post" class="form-group">
+    {% csrf_token %}
+    {{ form_create.as_div }}
+    <input type="submit" value="Save" class="btn">
+  </form>
+{% endblock main %}

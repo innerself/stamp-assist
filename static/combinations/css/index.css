@@ -53,4 +53,13 @@
   padding-right: 0.25rem;
 }
 
+.colnect-input {
+  background-color: #f4f5f4;
+  resize: none;
+}
 
+#colnect-submit {
+  width: 100px;
+  height: 75px;
+  background-color: #f4f5f4;
+}

@@ -1,29 +1,27 @@
+{% extends 'base/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-  <link rel="stylesheet" href="{% static 'combinations/css/index.css' %}" type="text/css">
-</head>
-<body>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Save">
-</form>
-<div class="sample-cards">
-  {% for sample in stampsample_list %}
-    <div class="sample-cards__item">
-      <h4>{{ sample.name }}</h4>
-      <p>Value: {{ sample.value }}</p>
-      <p><img src="{{ sample.image }}"></p>
+{% block extrahead %}
+  <link rel="stylesheet" type="text/css" href="{% static 'combinations/css/index.css' %}">
+{% endblock extrahead %}
+{% block main %}
+  <form method="post" class="form-group">
+    {% csrf_token %}
+    <div>
+      {{ form.as_div }}
+      <input type="submit" value="Save" id="colnect-submit" class="btn">
     </div>
-  {% empty %}
-    <p>No samples added</p>
-  {% endfor %}
-</div>
-<ul>
-</ul>
-</body>
-</html>
+  </form>
+  <div class="sample-cards">
+    {% for sample in stampsample_list %}
+      <div class="sample-cards__item">
+        <h4>{{ sample.name }}</h4>
+        <p>Value: {{ sample.value }}</p>
+        <p><img src="{{ sample.image }}"></p>
+      </div>
+    {% empty %}
+      <p>No samples added</p>
+    {% endfor %}
+  </div>
+  <ul>
+  </ul>
+{% endblock %}
