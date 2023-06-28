@@ -6,12 +6,12 @@
 {% block main %}
   <div class="main-wrapper">
     <div class="stamps-column">
-      {% for userstamp in userstamp_list %}
+      {% for stamp in stamps.values %}
         <div>
-          <h3>{{ userstamp.sample.name }}</h3>
-          <img src="{{ userstamp.sample.image }}">
-          <span class="stamps-quantity">&times;{{ userstamp.quantity }}</span>
-          Value: {{ userstamp.sample.value }}
+          <h3>{{ stamp.sample.name }}</h3>
+          <img src="{{ stamp.sample.image }}">
+          <span class="stamps-quantity">&times;{{ stamp.quantity }}</span>
+          Value: {{ stamp.sample.value }}
         </div>
       {% empty %}
         <div>

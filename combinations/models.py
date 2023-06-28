@@ -1,13 +1,13 @@
 import datetime
+import enum
 import io
 import itertools
 from decimal import Decimal
 from pathlib import Path
-
+from accounts.models import User
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, User
 from django.core.files.images import ImageFile
 from django.db import models
 from django.db.models.signals import post_save
@@ -24,9 +24,18 @@ imagekit = ImageKit(
 )
 
 
-class Desk(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='desk', on_delete=models.CASCADE)
+class DeskType(models.TextChoices):
+    """
+    AVAILABLE: stamps that user has
+    POSTCARD: stamp that user put on the virtual postcard
+    """
+    AVAILABLE = 'available'
+    POSTCARD = 'postcard'
 
+
+class Desk(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='desks', on_delete=models.CASCADE)
+    type = models.CharField(max_length=100, choices=DeskType.choices)
 
 
 class StampCollection(models.Model):
@@ -136,15 +145,59 @@ class Stamp(models.Model):
 class UserStamp(models.Model):
     sample = models.ForeignKey(StampSample, on_delete=models.CASCADE)
     comment = models.CharField(max_length=255, null=True, blank=True)
-    quantity = models.PositiveSmallIntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     desk = models.ForeignKey(Desk, related_name='user_stamps', on_delete=models.PROTECT, null=True)
 
-    class Meta:
-        unique_together = ('sample', 'user')
+    def __add__(self, other) -> Decimal:
+        if isinstance(other, self.__class__):
+            return self.sample.value + other.sample.value
+        elif isinstance(other, int) or isinstance(other, Decimal):
+            return self.sample.value + other
+
+    def __radd__(self, other):
+        return self + other
+
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return self.sample.value < other.sample.value
+        elif isinstance(other, int) or isinstance(other, Decimal):
+            return self.sample.value < other
+
+    def __str__(self):
+        if self.sample.name:
+            return f'{self.sample.name} ({self.sample.value})'
+        else:
+            return f'id={self.id} value={self.sample.value}'
+
+    @staticmethod
+    def combinations(user: User):
+        comb_groups = []
+        combs = []
+        comb_strings = []
+
+        all_stamps = []
+        for stamp in UserStamp.objects.filter(user=user):
+            all_stamps.extend([stamp] * stamp.quantity)
+
+        if user.stamps_count == 0:
+            for st_num in range(1, 6):
+                comb_groups.append(set(itertools.combinations(all_stamps, st_num)))
+        else:
+            comb_groups.append(itertools.combinations(all_stamps, user.stamps_count))
+
+        for comb_group in comb_groups:
+            for comb in comb_group:
+                value_applies = user.target_value <= (c_sum := sum(comb)) <= user.max_value
+                if value_applies and (c_srt := sorted(comb)) not in combs:
+                    combs.append(c_srt)
+                    comb_str = "<br> + ".join([str(x) for x in comb])
+                    comb_strings.append(f'{comb_str}<br> = {c_sum}')
+
+        return comb_strings
 
 
 @receiver(post_save, sender=User)
 def desk_create(sender, instance=None, created=False, **kwargs):
     if created:
-        Desk.objects.create(user=instance)
+        Desk.objects.create(user=instance, type=DeskType.AVAILABLE)
+        Desk.objects.create(user=instance, type=DeskType.POSTCARD)
