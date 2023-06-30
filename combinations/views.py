@@ -148,6 +148,7 @@ def user_stamp_view(request):
 
 
 def combinations_view(request):
+    combs = None
     if request.method == 'POST':
         if all(field in request.POST.keys() for field in CalcConfigForm.declared_fields):
             new_settings = {
@@ -159,15 +160,14 @@ def combinations_view(request):
             request.user.calc_settings = new_settings
             request.user.save()
 
-    desk = Desk.desk_available(request.user)
-    combs = desk.combinations()
+        desk = Desk.desk_available(request.user)
+        combs = desk.combinations()
 
     request.user.refresh_from_db()
     form = CalcConfigForm(initial=request.user.calc_settings)
 
     context = {
         'form': form,
-        # 'stamp_collection': stamp_collection,
         'combs': combs,
     }
 

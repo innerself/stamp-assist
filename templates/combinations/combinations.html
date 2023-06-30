@@ -27,19 +27,23 @@
             {% endfor %}
         </div>
         <div class="combs-cell">
-            {% for comb in combs %}
-                <p>
-                    {% for stamp in comb.stamps %}
-                        <img src="{{ stamp.sample.image }}"/>
-                        {% if not forloop.last %}
-                                &nbsp;+&nbsp;
-                        {% endif %}
-                    {% endfor %}
-                {{ comb.sum }}
-                </p>
-            {% empty %}
-                No combinations found
-            {% endfor %}
+            {% if combs == None %}
+                Press "Calculate" to get combinations
+            {% else %}
+                {% for comb in combs %}
+                    <p>
+                        {% for stamp in comb.stamps %}
+                            <img src="{{ stamp.sample.image }}"/>
+                            {% if not forloop.last %}
+                                    &nbsp;+&nbsp;
+                            {% endif %}
+                        {% endfor %}
+                    {{ comb.sum }}
+                    </p>
+                {% empty %}
+                    No combinations found
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="empty-zone-right"></div>
         <div class="footer"></div>
