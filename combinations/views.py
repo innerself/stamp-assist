@@ -159,7 +159,8 @@ def combinations_view(request):
             request.user.calc_settings = new_settings
             request.user.save()
 
-    combs = UserStamp.combinations(request.user)
+    desk = Desk.desk_available(request.user)
+    combs = desk.combinations()
 
     request.user.refresh_from_db()
     form = CalcConfigForm(initial=request.user.calc_settings)
@@ -170,4 +171,4 @@ def combinations_view(request):
         'combs': combs,
     }
 
-    return render(request, 'combinations/index.html', context)
+    return render(request, 'combinations/combinations.html', context)

@@ -2,8 +2,11 @@ import datetime
 import enum
 import io
 import itertools
+from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
+from typing import Self
+
 from accounts.models import User
 import requests
 from bs4 import BeautifulSoup
@@ -37,38 +40,34 @@ class Desk(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='desks', on_delete=models.CASCADE)
     type = models.CharField(max_length=100, choices=DeskType.choices)
 
+    def __repr__(self):
+        return f'{self.type.capitalize()} ({self.user.username})'
 
-class StampCollection(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    @classmethod
+    def desk_available(cls, user: User) -> Self:
+        return cls.objects.get(user=user, type=DeskType.AVAILABLE)
 
-    def all_stamps(self, exclude_values: list[int] = None):
-        stamps = []
-        for block in self.blocks.all():
-            stamps.extend([block.stamp] * block.number)
-        return stamps
+    @classmethod
+    def desk_postcard(cls, user: User) -> Self:
+        return cls.objects.get(user=user, type=DeskType.POSTCARD)
 
-    def combinations(self):
-        comb_groups = []
-        combs = []
-        comb_strings = []
+    def combinations(self) -> list:
+        all_stamps = UserStamp.objects.filter(user=self.user, desk=self)
+        combs_to_test = set()
+        result_combs = []
+
         if self.user.stamps_count == 0:
             for st_num in range(1, 6):
-                comb_groups.append(set(itertools.combinations(self.all_stamps(), st_num)))
+                combs_to_test.update(set(itertools.combinations(all_stamps, st_num)))
         else:
-            comb_groups.append(itertools.combinations(self.all_stamps(), self.user.stamps_count))
+            combs_to_test.update(itertools.combinations(all_stamps, self.user.stamps_count))
 
-        for comb_group in comb_groups:
-            for comb in comb_group:
-                value_applies = self.user.target_value <= (c_sum := sum(comb)) <= self.user.max_value
-                if value_applies and (c_srt := sorted(comb)) not in combs:
-                    combs.append(c_srt)
-                    comb_str = "<br> + ".join([str(x) for x in comb])
-                    comb_strings.append(f'{comb_str}<br> = {c_sum}')
+        for comb_to_test in combs_to_test:
+            value_applies = self.user.target_value <= sum(comb_to_test) <= self.user.max_value
+            if value_applies and ((comb := Combination(comb_to_test)) not in result_combs):
+                result_combs.append(comb)
 
-        return comb_strings
-
-    def __str__(self):
-        return f'{self.user} stamps collection'
+        return result_combs
 
 
 class StampSampleManager(models.Manager):
@@ -117,31 +116,6 @@ class StampSample(models.Model):
         return f'{self.name} ({self.value}, {self.year})'
 
 
-class Stamp(models.Model):
-    desk = models.ForeignKey(Desk, on_delete=models.PROTECT, null=True)
-
-    def __add__(self, other) -> Decimal:
-        if isinstance(other, self.__class__):
-            return self.value + other.value
-        elif isinstance(other, int) or isinstance(other, Decimal):
-            return self.value + other
-
-    def __radd__(self, other):
-        return self + other
-
-    def __lt__(self, other):
-        if isinstance(other, self.__class__):
-            return self.value < other.value
-        elif isinstance(other, int) or isinstance(other, Decimal):
-            return self.value < other
-
-    def __str__(self):
-        if self.name:
-            return f'{self.name} ({self.value})'
-        else:
-            return f'Stamp id={self.id} value={self.value}'
-
-
 class UserStamp(models.Model):
     sample = models.ForeignKey(StampSample, on_delete=models.CASCADE)
     comment = models.CharField(max_length=255, null=True, blank=True)
@@ -154,7 +128,7 @@ class UserStamp(models.Model):
         elif isinstance(other, int) or isinstance(other, Decimal):
             return self.sample.value + other
 
-    def __radd__(self, other):
+    def __radd__(self, other) -> Decimal:
         return self + other
 
     def __lt__(self, other):
@@ -169,35 +143,25 @@ class UserStamp(models.Model):
         else:
             return f'id={self.id} value={self.sample.value}'
 
-    @staticmethod
-    def combinations(user: User):
-        comb_groups = []
-        combs = []
-        comb_strings = []
-
-        all_stamps = []
-        for stamp in UserStamp.objects.filter(user=user):
-            all_stamps.extend([stamp] * stamp.quantity)
-
-        if user.stamps_count == 0:
-            for st_num in range(1, 6):
-                comb_groups.append(set(itertools.combinations(all_stamps, st_num)))
-        else:
-            comb_groups.append(itertools.combinations(all_stamps, user.stamps_count))
-
-        for comb_group in comb_groups:
-            for comb in comb_group:
-                value_applies = user.target_value <= (c_sum := sum(comb)) <= user.max_value
-                if value_applies and (c_srt := sorted(comb)) not in combs:
-                    combs.append(c_srt)
-                    comb_str = "<br> + ".join([str(x) for x in comb])
-                    comb_strings.append(f'{comb_str}<br> = {c_sum}')
-
-        return comb_strings
-
 
 @receiver(post_save, sender=User)
 def desk_create(sender, instance=None, created=False, **kwargs):
     if created:
         Desk.objects.create(user=instance, type=DeskType.AVAILABLE)
         Desk.objects.create(user=instance, type=DeskType.POSTCARD)
+
+
+@dataclass
+class Combination:
+    stamps: list[UserStamp]
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, self.__class__):
+            self_names = sorted([x.sample.name for x in self.stamps])
+            other_names = sorted([x.sample.name for x in other.stamps])
+            return self_names == other_names
+
+        return NotImplemented
+
+    def sum(self) -> Decimal:
+        return sum(self.stamps)
