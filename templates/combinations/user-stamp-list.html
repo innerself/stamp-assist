@@ -7,12 +7,34 @@
   <div class="main-wrapper">
     <div class="stamps-column">
       {% for stamp in stamps.values %}
-        <div>
-          <h3>{{ stamp.sample.name }}</h3>
-          <img src="{{ stamp.sample.image }}">
-          <span class="stamps-quantity">&times;{{ stamp.quantity }}</span>
-          Value: {{ stamp.sample.value }}
+        <div class="card stamp-card">
+          <img src="{{ stamp.sample.image }}" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">{{ stamp.sample.name }}</h5>
+            <p class="card-text text-center">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</p>
+{#            <ul class="card-text">#}
+{#              <li>Value: {{ stamp.sample.value }}</li>#}
+{#              <li>Quantity: {{ stamp.quantity }}</li>#}
+{#            </ul>#}
+{#            <div >Value: {{ stamp.sample.value }}</div>#}
+{#            <div class="card-text">Value: {{ stamp.sample.value }}</div>#}
+{#            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's#}
+{#              content.</p>#}
+{#            <div class="card-footer">#}
+{#              <a href="#" class="btn btn-primary">Go somewhere</a>#}
+{#            </div>#}
+          </div>
         </div>
+        {#        <div class="card">#}
+        {#          <div class="card__cover">#}
+        {#            <img class="user-list-image" src="{{ stamp.sample.image }}">#}
+        {#          </div>#}
+        {#          <div class="card__content">#}
+        {#            <h4>{{ stamp.sample.name }}</h4>#}
+        {#            Value: {{ stamp.sample.value }}#}
+        {#            <span class="stamps-quantity">&times;{{ stamp.quantity }}</span>#}
+        {#          </div>#}
+        {#        </div>#}
       {% empty %}
         <div>
           <p>User has no stamps added</p>

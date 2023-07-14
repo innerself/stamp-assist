@@ -13,10 +13,6 @@
   grid-gap: 2em;
 }
 
-.stamp-cell {
-
-}
-
 .edit-column {
   grid-column: 2;
   display: grid;
@@ -25,6 +21,16 @@
 
 .add-cell {
   grid-row: 1;
+}
+
+
+.user-list-image {
+  max-width: 300px;
+  max-height: 100px;
+}
+
+.stamp-card {
+  width: 13rem;
 }
 
 

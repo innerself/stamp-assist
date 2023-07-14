@@ -2,11 +2,13 @@ import datetime
 import enum
 import io
 import itertools
+import math
+import time
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 from typing import Self
-
+from logging import getLogger
 from accounts.models import User
 import requests
 from bs4 import BeautifulSoup
@@ -25,6 +27,8 @@ imagekit = ImageKit(
     public_key=env('IMAGE_KIT_PUBLIC_KEY'),
     url_endpoint=env('IMAGE_KIT_ENDPOINT'),
 )
+
+logger = getLogger()
 
 
 class DeskType(models.TextChoices):
@@ -51,21 +55,39 @@ class Desk(models.Model):
     def desk_postcard(cls, user: User) -> Self:
         return cls.objects.get(user=user, type=DeskType.POSTCARD)
 
-    def combinations(self) -> list:
+    def combinations(self):
         all_stamps = UserStamp.objects.filter(user=self.user, desk=self)
-        combs_to_test = set()
+        combs_to_test = []
         result_combs = []
+        total_combs = 0
 
+        start = time.perf_counter()
         if self.user.stamps_count == 0:
             for st_num in range(1, 6):
-                combs_to_test.update(set(itertools.combinations(all_stamps, st_num)))
+                total_combs += math.comb(len(all_stamps), st_num)
+                combs_to_test.append(itertools.combinations(all_stamps, st_num))
         else:
-            combs_to_test.update(itertools.combinations(all_stamps, self.user.stamps_count))
+            total_combs += math.comb(len(all_stamps), self.user.stamps_count)
+            combs_to_test.append(itertools.combinations(all_stamps, self.user.stamps_count))
 
-        for comb_to_test in combs_to_test:
-            value_applies = self.user.target_value <= sum(comb_to_test) <= self.user.max_value
-            if value_applies and ((comb := Combination(comb_to_test)) not in result_combs):
-                result_combs.append(comb)
+        print(f'User {self.user.username} requested to evaluate {total_combs} combinations')
+
+        flt = set()
+        flt_check = set()
+        for index, c in enumerate(itertools.chain(*combs_to_test)):
+            print(f'{index}/{total_combs}', end='\r')
+            if (t := tuple(sorted(x.sample.name for x in c))) not in flt_check:
+                flt_check.add(t)
+                flt.add(tuple(sorted([(x.sample.name, x.id) for x in c])))
+
+        print(f't1: {time.perf_counter() - start}')
+
+        for index, comb_to_test in enumerate(flt):
+            comb_ids = [x[1] for x in comb_to_test]
+            comb_db_objs = [x for x in all_stamps if x.id in comb_ids]
+            value_applies = self.user.target_value <= sum(comb_db_objs) <= self.user.max_value
+            if value_applies:
+                result_combs.append(Combination(comb_db_objs))
 
         return result_combs
 
@@ -118,9 +140,10 @@ class StampSample(models.Model):
 
 class UserStamp(models.Model):
     sample = models.ForeignKey(StampSample, on_delete=models.CASCADE)
+    custom_name = models.CharField(max_length=255, null=True, blank=True)
     comment = models.CharField(max_length=255, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    desk = models.ForeignKey(Desk, related_name='user_stamps', on_delete=models.PROTECT, null=True)
+    desk = models.ForeignKey(Desk, related_name='stamps', on_delete=models.PROTECT, null=True)
 
     def __add__(self, other) -> Decimal:
         if isinstance(other, self.__class__):
