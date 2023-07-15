@@ -1,0 +1,19 @@
+.comb-group {
+  margin: 1.5rem auto 1.5rem auto;
+}
+
+/*.comb-card {*/
+/*  margin: 0.5rem;*/
+/*  max-height: 10rem;*/
+/*}*/
+
+/*.comb-card-img {*/
+/*  max-height: 7rem;*/
+/*}*/
+
+.comb-card {
+  max-width: 13rem;
+  margin: auto 0.5rem auto 0.5rem;
+  background-color: transparent;
+  border: none;
+}

@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% block extrahead %}
-  <link rel="stylesheet" href="{% static 'combinations/css/index.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'combinations/css/combinations.css' %}" type="text/css">
 {% endblock extrahead %}
 {% block main %}
   <div class="container">
@@ -18,12 +18,18 @@
           Press "Calculate" to get combinations
         {% else %}
           {% for comb in combs %}
-            <p>
+            <div class="card-group comb-group">
               {% for stamp in comb.stamps %}
-                <img src="{{ stamp.sample.image }}"/>
+                <div class="card comb-card h-100">
+                  <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
+                </div>
               {% endfor %}
-              {{ comb.sum }}
-            </p>
+              <div class="card comb-card h-100">
+                <div class="card-body">
+                  {{ comb.sum }}
+                </div>
+              </div>
+            </div>
           {% empty %}
             No combinations found
           {% endfor %}

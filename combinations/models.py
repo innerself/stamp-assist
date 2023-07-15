@@ -98,7 +98,7 @@ class Desk(models.Model):
             if value_applies:
                 result_combs.append(Combination(comb_db_objs))
 
-        return result_combs
+        return sorted(result_combs, key=lambda x: x.sum())
 
 
 class StampSampleManager(models.Manager):
