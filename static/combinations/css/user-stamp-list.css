@@ -1,7 +1,7 @@
 .main-wrapper {
   padding: 20px;
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 1fr;
   grid-gap: 2em;
 }
 
@@ -23,17 +23,30 @@
   grid-row: 1;
 }
 
-
 .user-list-image {
   max-width: 300px;
   max-height: 100px;
 }
 
 .stamp-card {
-  width: 13rem;
+  width: 16rem;
 }
 
+.stamp-edit-box {
+  width: 100%;
+}
 
-.stamps-quantity {
-  font-size: xxx-large;
+.stamp-value-count {
+  display: inline-block;
+  float: left;
+}
+
+.stamp-edit-icon {
+  display: inline-block;
+  float: right;
+  color: gray;
+}
+
+.stamp-footer {
+  justify-items: stretch;
 }

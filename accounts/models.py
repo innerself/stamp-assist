@@ -6,6 +6,7 @@ class User(AbstractUser):
     stamps_count = models.IntegerField(default=2)
     target_value = models.DecimalField(max_digits=10, decimal_places=2, default=75)
     max_value = models.DecimalField(max_digits=10, decimal_places=2, default=100)
+    allow_stamp_repeat = models.BooleanField(default=False)
 
     @property
     def calc_settings(self):

@@ -15,6 +15,7 @@ requests = "^2.31.0"
 pillow = "^9.5.0"
 imagekitio = "^3.0.1"
 urllib3 = "1.26.16"
+django-feather = "^0.3.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "stamp_assist.settings"

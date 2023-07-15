@@ -1,5 +1,6 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% load icon %}
 {% block extrahead %}
   <link rel="stylesheet" type="text/css" href="{% static 'combinations/css/user-stamp-list.css' %}">
 {% endblock extrahead %}
@@ -7,34 +8,24 @@
   <div class="main-wrapper">
     <div class="stamps-column">
       {% for stamp in stamps.values %}
-        <div class="card stamp-card">
+        <div class="card stamp-card h-100">
           <img src="{{ stamp.sample.image }}" class="card-img-top" alt="...">
           <div class="card-body">
-            <h5 class="card-title">{{ stamp.sample.name }}</h5>
-            <p class="card-text text-center">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</p>
-{#            <ul class="card-text">#}
-{#              <li>Value: {{ stamp.sample.value }}</li>#}
-{#              <li>Quantity: {{ stamp.quantity }}</li>#}
-{#            </ul>#}
-{#            <div >Value: {{ stamp.sample.value }}</div>#}
-{#            <div class="card-text">Value: {{ stamp.sample.value }}</div>#}
-{#            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's#}
-{#              content.</p>#}
-{#            <div class="card-footer">#}
-{#              <a href="#" class="btn btn-primary">Go somewhere</a>#}
-{#            </div>#}
+            <h5 class="card-title">
+              {% if stamp.custom_name %}
+                {{ stamp.custom_name }}
+              {% else %}
+                {{ stamp.sample.name }}
+              {% endif %}
+            </h5>
+            <div class="card-text">{{ stamp.comment }}</div>
+          </div>
+          <div class="card-footer stamp-footer bg-white">
+            <div
+                class="text-muted stamp-value-count">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</div>
+            <a class="stamp-edit-icon" href="#">{% icon "edit-2" %}</a>
           </div>
         </div>
-        {#        <div class="card">#}
-        {#          <div class="card__cover">#}
-        {#            <img class="user-list-image" src="{{ stamp.sample.image }}">#}
-        {#          </div>#}
-        {#          <div class="card__content">#}
-        {#            <h4>{{ stamp.sample.name }}</h4>#}
-        {#            Value: {{ stamp.sample.value }}#}
-        {#            <span class="stamps-quantity">&times;{{ stamp.quantity }}</span>#}
-        {#          </div>#}
-        {#        </div>#}
       {% empty %}
         <div>
           <p>User has no stamps added</p>

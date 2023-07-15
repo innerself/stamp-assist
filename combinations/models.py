@@ -142,8 +142,9 @@ class UserStamp(models.Model):
     sample = models.ForeignKey(StampSample, on_delete=models.CASCADE)
     custom_name = models.CharField(max_length=255, null=True, blank=True)
     comment = models.CharField(max_length=255, null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stamps', on_delete=models.CASCADE)
     desk = models.ForeignKey(Desk, related_name='stamps', on_delete=models.PROTECT, null=True)
+    allow_repeat = models.BooleanField(default=False)
 
     def __add__(self, other) -> Decimal:
         if isinstance(other, self.__class__):

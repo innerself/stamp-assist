@@ -64,18 +64,21 @@ def user_stamp_view(request):
                 )
                 UserStamp.objects.create(
                     sample=data['sample'],
+                    custom_name=data['custom_name'],
                     comment=data['comment'],
                     user=request.user,
                     desk=desk,
                 )
 
-    form = UserStampCreateForm()
+    form = UserStampCreateForm(user=request.user)
 
     stamps = {}
     for stamp in UserStamp.objects.filter(user=request.user):
         if stamp.sample.name not in stamps:
             stamps[stamp.sample.name] = {
                 'sample': stamp.sample,
+                'custom_name': stamp.custom_name,
+                'comment': stamp.comment,
                 'quantity': 0,
             }
         stamps[stamp.sample.name]['quantity'] += 1
