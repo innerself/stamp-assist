@@ -12,21 +12,18 @@
           <img src="{{ stamp.sample.image }}" class="card-img-top" alt="...">
           <div class="card-body">
             <h5 class="card-title">
-              {% if stamp.custom_name %}
-                {{ stamp.custom_name }}
-              {% else %}
-                {{ stamp.sample.name }}
-              {% endif %}
+              {% firstof stamp.custom_name stamp.sample.name %}
             </h5>
             <div class="card-text">{{ stamp.comment }}</div>
           </div>
           <div class="card-footer stamp-footer bg-white">
-            <div
-                class="text-muted stamp-value-count">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</div>
-            <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>
-            {% if stamp.allow_repeat %}
-              {% icon "repeat" class="stamp-repeat-icon" %}
-            {% endif %}
+            <div class="text-muted stamp-value-count">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</div>
+            <div class="stamp-controls">
+              {% if stamp.allow_repeat %}
+                {% icon "repeat" class="stamp-repeat-icon" %}
+              {% endif %}
+              <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>
+            </div>
           </div>
         </div>
       {% empty %}
