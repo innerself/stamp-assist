@@ -23,7 +23,7 @@
           <div class="card-footer stamp-footer bg-white">
             <div
                 class="text-muted stamp-value-count">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</div>
-            <a class="stamp-edit-icon" href="#">{% icon "edit-2" %}</a>
+            <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>
           </div>
         </div>
       {% empty %}

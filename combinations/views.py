@@ -1,15 +1,14 @@
 import time
 from decimal import Decimal
 
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 from django.views.decorators.http import require_http_methods
-from django.views.generic import FormView, ListView
-from django.db.models import Count
+from django.views.generic import ListView
 
-from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm
+from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm, UserStampEditForm
 from .models import StampSample, UserStamp, Desk, DeskType
 
 
@@ -76,6 +75,7 @@ def user_stamp_view(request):
     for stamp in UserStamp.objects.filter(user=request.user):
         if stamp.sample.name not in stamps:
             stamps[stamp.sample.name] = {
+                'id': stamp.id,
                 'sample': stamp.sample,
                 'custom_name': stamp.custom_name,
                 'comment': stamp.comment,
@@ -89,6 +89,71 @@ def user_stamp_view(request):
     }
 
     return render(request, 'combinations/user-stamp-list.html', context)
+
+
+def user_stamp_edit_view(request, stamp_id: int):
+    stamp = UserStamp.objects.get(id=stamp_id)
+    if not request.user.is_authenticated or stamp.user.id != request.user.id:
+        return HttpResponseForbidden()
+
+    init_stamps_count = UserStamp.objects.filter(
+        user=stamp.user,
+        sample=stamp.sample,
+    ).count()
+
+    if request.method == 'POST':
+        form = UserStampEditForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            if data['quantity_change'] > 0:
+                desk = Desk.objects.get(
+                    user=request.user,
+                    type=DeskType.AVAILABLE,
+                )
+
+                for _ in range(data['quantity_change']):
+                    UserStamp.objects.create(
+                        sample=stamp.sample,
+                        user=request.user,
+                        desk=desk,
+                    )
+            elif data['quantity_change'] < 0:
+                if abs(data['quantity_change']) > init_stamps_count:
+                    return HttpResponseBadRequest('Not enough stamps to remove')
+
+                UserStamp.objects.filter(
+                    sample=stamp.sample,
+                    user=request.user,
+                )[form.quantity_change].delete()
+
+            UserStamp.objects.filter(
+                sample=stamp.sample,
+                user=request.user,
+            ).update(
+                custom_name=data['custom_name'],
+                comment=data['comment'],
+                allow_repeat=data['allow_repeat'],
+            )
+
+    stamp.refresh_from_db()
+
+    data = {
+        'original_name': stamp.sample.name,
+        'custom_name': stamp.custom_name,
+        'comment': stamp.comment,
+        'quantity': UserStamp.objects.filter(
+            user=stamp.user,
+            sample=stamp.sample,
+        ).count(),
+    }
+    form = UserStampEditForm(initial=data)
+
+    context = {
+        'stamp': stamp,
+        'form': form,
+    }
+
+    return render(request, 'combinations/user-stamp-edit.html', context)
 
 
 def combinations_view(request):

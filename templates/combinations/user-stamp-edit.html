@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load icon %}
+{% block extrahead %}
+  <link rel="stylesheet" type="text/css" href="{% static 'combinations/css/user-stamp-edit.css' %}">
+{% endblock extrahead %}
+{% block main %}
+  <div class="container main-wrapper">
+    <div class="row">
+      <div class="col-sm-4">
+        <div><img src="{{ stamp.sample.image }}" alt="..."></div>
+      </div>
+      <div class="col-sm-8">
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group row">
+            <label for="originalName" class="col-sm-4 col-form-label">Original name</label>
+            <div class="col-sm-8">{{ form.original_name }}</div>
+          </div>
+          <div class="form-group row">
+            <label for="customName" class="col-sm-4 col-form-label">Custom name</label>
+            <div class="col-sm-8">{{ form.custom_name }}</div>
+          </div>
+          <div class="form-group row">
+            <label for="comment" class="col-sm-4 col-form-label">Comment</label>
+            <div class="col-sm-8">{{ form.comment }}</div>
+          </div>
+          <div class="form-group row">
+            <label for="quantity" class="col-sm-4 col-form-label">Quantity</label>
+            <div class="col-sm-8">{{ form.quantity }}</div>
+          </div>
+          <div class="form-group row">
+            <label for="quantityChange" class="col-sm-4 col-form-label">Quantity change</label>
+            <div class="col-sm-8">{{ form.quantity_change }}</div>
+          </div>
+          <div class="form-group row">
+            <label for="allowRepeat" class="col-sm-4 col-form-label">Allow repeat</label>
+            <div class="col-sm-8">{{ form.allow_repeat }}</div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save</button>
+{#          <button type="submit" class="btn btn-danger">#}
+{#            <a href="{% url "combinations:user-stamps" %}">Cancel</a>#}
+{#          </button>#}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock main %}
