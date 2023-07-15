@@ -48,7 +48,7 @@ class StampSampleColnectView(View):
         return view(request, *args, **kwargs)
 
 
-def user_stamp_view(request):
+def user_stamps_list_view(request):
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 
@@ -80,6 +80,7 @@ def user_stamp_view(request):
                 'custom_name': stamp.custom_name,
                 'comment': stamp.comment,
                 'quantity': 0,
+                'allow_repeat': stamp.allow_repeat,
             }
         stamps[stamp.sample.name]['quantity'] += 1
 
@@ -91,7 +92,7 @@ def user_stamp_view(request):
     return render(request, 'combinations/user-stamp-list.html', context)
 
 
-def user_stamp_edit_view(request, stamp_id: int):
+def user_stamps_edit_view(request, stamp_id: int):
     stamp = UserStamp.objects.get(id=stamp_id)
     if not request.user.is_authenticated or stamp.user.id != request.user.id:
         return HttpResponseForbidden()
@@ -121,10 +122,12 @@ def user_stamp_edit_view(request, stamp_id: int):
                 if abs(data['quantity_change']) > init_stamps_count:
                     return HttpResponseBadRequest('Not enough stamps to remove')
 
-                UserStamp.objects.filter(
+                stamps_to_delete = UserStamp.objects.filter(
                     sample=stamp.sample,
                     user=request.user,
-                )[form.quantity_change].delete()
+                )[:abs(data['quantity_change'])]
+                for stamp in stamps_to_delete:
+                    stamp.delete()
 
             UserStamp.objects.filter(
                 sample=stamp.sample,
@@ -134,6 +137,8 @@ def user_stamp_edit_view(request, stamp_id: int):
                 comment=data['comment'],
                 allow_repeat=data['allow_repeat'],
             )
+
+            return HttpResponseRedirect(reverse('combinations:user-stamps'))
 
     stamp.refresh_from_db()
 
@@ -145,6 +150,7 @@ def user_stamp_edit_view(request, stamp_id: int):
             user=stamp.user,
             sample=stamp.sample,
         ).count(),
+        'allow_repeat': stamp.allow_repeat,
     }
     form = UserStampEditForm(initial=data)
 

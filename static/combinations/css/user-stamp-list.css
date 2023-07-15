@@ -41,6 +41,13 @@
   float: left;
 }
 
+.stamp-repeat-icon {
+  display: inline-block;
+  float: right;
+  color: gray;
+  margin-right: 0.5rem;
+}
+
 .stamp-edit-icon {
   display: inline-block;
   float: right;

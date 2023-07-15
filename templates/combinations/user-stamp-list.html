@@ -24,6 +24,9 @@
             <div
                 class="text-muted stamp-value-count">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</div>
             <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>
+            {% if stamp.allow_repeat %}
+              {% icon "repeat" class="stamp-repeat-icon" %}
+            {% endif %}
           </div>
         </div>
       {% empty %}
