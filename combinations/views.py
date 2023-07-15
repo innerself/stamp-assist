@@ -107,16 +107,11 @@ def user_stamps_edit_view(request, stamp_id: int):
         if form.is_valid():
             data = form.cleaned_data
             if data['quantity_change'] > 0:
-                desk = Desk.objects.get(
-                    user=request.user,
-                    type=DeskType.AVAILABLE,
-                )
-
                 for _ in range(data['quantity_change']):
                     UserStamp.objects.create(
                         sample=stamp.sample,
                         user=request.user,
-                        desk=desk,
+                        desk=Desk.desk_available(request.user),
                     )
             elif data['quantity_change'] < 0:
                 if abs(data['quantity_change']) > init_stamps_count:

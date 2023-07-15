@@ -1,25 +1,23 @@
 import datetime
-import enum
-import io
 import itertools
 import math
 import time
 from dataclasses import dataclass
 from decimal import Decimal
+from logging import getLogger
 from pathlib import Path
 from typing import Self
-from logging import getLogger
-from accounts.models import User
+
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.core.files.images import ImageFile
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from imagekitio import ImageKit
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 
+from accounts.models import User
 from stamp_assist.settings import env
 
 imagekit = ImageKit(
@@ -56,7 +54,18 @@ class Desk(models.Model):
         return cls.objects.get(user=user, type=DeskType.POSTCARD)
 
     def combinations(self):
-        all_stamps = UserStamp.objects.filter(user=self.user, desk=self)
+        if self.user.allow_stamp_repeat:
+            all_stamps = UserStamp.objects.filter(user=self.user, desk=self)
+        else:
+            all_stamps = []
+            added_samples = []
+            for stamp in UserStamp.objects.filter(user=self.user, desk=self):
+                if stamp.allow_repeat:
+                    all_stamps.append(stamp)
+                elif stamp.sample not in added_samples:
+                    all_stamps.append(stamp)
+                    added_samples.append(stamp.sample)
+
         combs_to_test = []
         result_combs = []
         total_combs = 0
