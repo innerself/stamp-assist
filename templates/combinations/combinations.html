@@ -10,6 +10,7 @@
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Calculate">
+        <button type="submit" name="reset" value="true">Reset</button>
       </form>
     </div>
     <div class="row">
@@ -22,6 +23,15 @@
               {% for stamp in comb.stamps %}
                 <div class="card comb-card h-100">
                   <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
+                  <div class="card-body">
+                    <form method="post">
+                      {% csrf_token %}
+                      <div class="btn-group btn-group-sm w-100" role="group">
+                        <button class="btn btn-success" name="use_stamp" value="{{ stamp.id }}">Use</button>
+                        <button class="btn btn-warning" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               {% endfor %}
               <div class="card comb-card h-100">
@@ -35,7 +45,18 @@
           {% endfor %}
         {% endif %}
       </div>
-      <div class="col-4"></div>
+      <div class="col-4">
+        <div class="container">
+          <div class="row">
+            <div class="card-group comb-group">
+              {% for stamp in used_stamps %}
+                <div class="card comb-card h-100">
+                  <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
+                </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock main %}

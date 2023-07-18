@@ -170,6 +170,29 @@ def combinations_view(request):
             request.user.calc_settings = new_settings
             request.user.save()
 
+        if stamp_id := request.POST.get('use_stamp'):
+            stamp = UserStamp.objects.get(id=stamp_id)
+            stamp.desk = Desk.desk_postcard(request.user)
+            stamp.save()
+
+            if not request.user.allow_stamp_repeat and not stamp.allow_repeat:
+                UserStamp.objects \
+                    .filter(user=request.user, sample=stamp.sample) \
+                    .exclude(id=stamp_id) \
+                    .update(desk=Desk.desk_removed(request.user))
+        elif stamp_id := request.POST.get('remove_stamp'):
+            stamp = UserStamp.objects.get(id=stamp_id)
+            UserStamp.objects.filter(
+                user=stamp.user,
+                sample=stamp.sample,
+            ).update(desk=Desk.desk_removed(request.user))
+        elif 'reset' in request.POST:
+            desk = Desk.desk_available(request.user)
+            UserStamp.objects \
+                .filter(user=request.user) \
+                .exclude(desk=desk) \
+                .update(desk=desk)
+
         desk = Desk.desk_available(request.user)
         combs = desk.combinations()
 
@@ -179,6 +202,9 @@ def combinations_view(request):
     context = {
         'form': form,
         'combs': combs,
+        'used_stamps': UserStamp.objects.filter(
+            user=request.user, desk=Desk.desk_postcard(request.user),
+        ),
     }
 
     return render(request, 'combinations/combinations.html', context)

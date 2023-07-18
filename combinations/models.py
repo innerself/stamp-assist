@@ -36,6 +36,7 @@ class DeskType(models.TextChoices):
     """
     AVAILABLE = 'available'
     POSTCARD = 'postcard'
+    REMOVED = 'removed'
 
 
 class Desk(models.Model):
@@ -53,13 +54,22 @@ class Desk(models.Model):
     def desk_postcard(cls, user: User) -> Self:
         return cls.objects.get(user=user, type=DeskType.POSTCARD)
 
+    @classmethod
+    def desk_removed(cls, user: User) -> Self:
+        return cls.objects.get(user=user, type=DeskType.REMOVED)
+
     def combinations(self):
         if self.user.allow_stamp_repeat:
-            all_stamps = UserStamp.objects.filter(user=self.user, desk=self)
+            all_stamps = UserStamp.objects \
+                .filter(user=self.user) \
+                .exclude(desk=self.desk_removed(self.user))
         else:
             all_stamps = []
             added_samples = []
-            for stamp in UserStamp.objects.filter(user=self.user, desk=self):
+            for stamp in UserStamp.objects \
+                    .filter(user=self.user) \
+                    .exclude(desk=self.desk_removed(self.user)):
+
                 if stamp.allow_repeat:
                     all_stamps.append(stamp)
                 elif stamp.sample not in added_samples:
@@ -91,8 +101,15 @@ class Desk(models.Model):
 
         print(f't1: {time.perf_counter() - start}')
 
+        stamp_ids_on_pc = UserStamp.objects \
+            .filter(user=self.user, desk=Desk.desk_postcard(self.user)) \
+            .values_list('id', flat=True)
         for index, comb_to_test in enumerate(flt):
             comb_ids = [x[1] for x in comb_to_test]
+
+            if stamp_ids_on_pc and not set(stamp_ids_on_pc).issubset(comb_ids):
+                continue
+
             comb_db_objs = [x for x in all_stamps if x.id in comb_ids]
             value_applies = self.user.target_value <= sum(comb_db_objs) <= self.user.max_value
             if value_applies:
@@ -182,6 +199,7 @@ def desk_create(sender, instance=None, created=False, **kwargs):
     if created:
         Desk.objects.create(user=instance, type=DeskType.AVAILABLE)
         Desk.objects.create(user=instance, type=DeskType.POSTCARD)
+        Desk.objects.create(user=instance, type=DeskType.REMOVED)
 
 
 @dataclass
