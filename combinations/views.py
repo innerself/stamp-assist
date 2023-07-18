@@ -205,6 +205,9 @@ def combinations_view(request):
         'used_stamps': UserStamp.objects.filter(
             user=request.user, desk=Desk.desk_postcard(request.user),
         ),
+        'removed_stamps': set(x.sample for x in UserStamp.objects.filter(
+            user=request.user, desk=Desk.desk_removed(request.user),
+        ))
     }
 
     return render(request, 'combinations/combinations.html', context)

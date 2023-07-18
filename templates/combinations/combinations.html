@@ -14,6 +14,7 @@
       </form>
     </div>
     <div class="row">
+      <h4>Combinations</h4>
       <div class="col-8">
         {% if combs == None %}
           Press "Calculate" to get combinations
@@ -48,12 +49,24 @@
       <div class="col-4">
         <div class="container">
           <div class="row">
+            <h4>On postcard</h4>
             <div class="card-group comb-group">
               {% for stamp in used_stamps %}
                 <div class="card comb-card h-100">
                   <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
                 </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="row">
+            <h4>Removed</h4>
+            <div class="card-group comb-group">
+              {% for sample in removed_stamps %}
+                <div class="card comb-card h-100">
+                  <img class="card-img-top" src="{{ sample.image }}" alt="..."/>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
       </div>
