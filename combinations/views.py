@@ -14,7 +14,7 @@ from .models import StampSample, UserStamp, Desk, DeskType
 
 def index_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('combinations:user-stamps'))
+        return HttpResponseRedirect(reverse('combinations:combinations'))
     else:
         return HttpResponseRedirect(reverse('accounts:login'))
 
