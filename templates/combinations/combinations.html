@@ -28,8 +28,8 @@
                     <form method="post">
                       {% csrf_token %}
                       <div class="btn-group btn-group-sm w-100" role="group">
-                        <button class="btn btn-success" name="use_stamp" value="{{ stamp.id }}">Use</button>
-                        <button class="btn btn-warning" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
+                        <button class="btn btn-success w-100" name="use_stamp" value="{{ stamp.id }}">Use</button>
+                        <button class="btn btn-warning w-100" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
                       </div>
                     </form>
                   </div>
