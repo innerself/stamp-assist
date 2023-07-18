@@ -1,0 +1,9 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block main %}
+  <form method="post" action="{% url 'accounts:login' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Login">
+  </form>
+{% endblock %}

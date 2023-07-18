@@ -48,4 +48,3 @@ class UserStampEditForm(forms.Form):
     quantity = forms.IntegerField(disabled=True, required=False)
     quantity_change = forms.IntegerField(initial=0)
     allow_repeat = forms.BooleanField(initial=False, required=False)
-

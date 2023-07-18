@@ -12,8 +12,11 @@ from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm, UserS
 from .models import StampSample, UserStamp, Desk, DeskType
 
 
-def root_view(request):
-    return HttpResponseRedirect(reverse('combinations:user-stamps'))
+def index_view(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('combinations:user-stamps'))
+    else:
+        return HttpResponseRedirect(reverse('accounts:login'))
 
 
 class StampSampleListView(ListView):

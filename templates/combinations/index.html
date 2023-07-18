@@ -4,38 +4,5 @@
   <link rel="stylesheet" href="{% static 'combinations/css/index.css' %}" type="text/css">
 {% endblock extrahead %}
 {% block main %}
-  <div class="table">
-    <div class="header">
-      <div>
-        <form method="post">
-          {% csrf_token %}
-          {{ form }}
-          <input type="submit" value="Calculate">
-        </form>
-      </div>
-    </div>
-    <div class="empty-zone-left"></div>
-    <div class="stamps-cell">
-      {% for sblock in stamp_collection.blocks.all %}
-        <div class="stamp-block" id="{{ sblock.id }}">
-          <b>Value:</b> {{ sblock.stamp.value }} <b>Count:</b> {{ sblock.number }}
-          <form method="post">
-            {% csrf_token %}
-            <button class="button-use" type="submit" value="{{ sblock.id }}" name="use-block">Use</button>
-          </form>
-        </div>
-      {% endfor %}
-    </div>
-    <div class="combs-cell">
-      {% for comb in combs %}
-        {% autoescape off %}
-          <p>{{ comb }}</p>
-        {% endautoescape %}
-      {% empty %}
-        No combinations found
-      {% endfor %}
-    </div>
-    <div class="empty-zone-right"></div>
-    <div class="footer"></div>
-  </div>
+
 {% endblock main %}
