@@ -1,6 +1,7 @@
 import datetime
 import itertools
 import math
+import random
 import time
 from dataclasses import dataclass
 from decimal import Decimal
@@ -16,6 +17,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from imagekitio import ImageKit
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
+from mimesis import Text, Locale, Datetime, Address, Finance, BinaryFile
 
 from accounts.models import User
 from stamp_assist.settings import env
@@ -28,6 +30,12 @@ imagekit = ImageKit(
 
 logger = getLogger()
 
+mim_text_en = Text(locale=Locale.EN)
+mim_datetime = Datetime()
+mim_address_en = Address(locale=Locale.EN)
+mim_finance = Finance()
+mim_binary_file = BinaryFile()
+
 
 class DeskType(models.TextChoices):
     """
@@ -37,6 +45,10 @@ class DeskType(models.TextChoices):
     AVAILABLE = 'available'
     POSTCARD = 'postcard'
     REMOVED = 'removed'
+
+
+class DeskManager(models.QuerySet):
+    pass
 
 
 class Desk(models.Model):
@@ -118,8 +130,8 @@ class Desk(models.Model):
         return sorted(result_combs, key=lambda x: x.sum())
 
 
-class StampSampleManager(models.Manager):
-    def from_colnect(self, url: str):
+class StampSampleManager(models.QuerySet):
+    def from_colnect_url(self, url: str):
         """Create an instance from colnect.com URL."""
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
@@ -146,6 +158,19 @@ class StampSampleManager(models.Manager):
             image=ik_image.url,
         )
 
+    def generate(self, **kwargs):
+        return self.create(
+            name=kwargs.get('name', mim_text_en.title()),
+            year=kwargs.get('year', mim_datetime.year()),
+            country=kwargs.get('country', mim_address_en.country()),
+            value=kwargs.get('value', mim_finance.price(1, 101)),
+            width=kwargs.get('width', random.randint(50, 400)),
+            height=kwargs.get('height', random.randint(50, 400)),
+            topics=kwargs.get('topics', mim_text_en.words(3)),
+            michel_number=kwargs.get('michel_number', f'{mim_address_en.country_code()} {random.randint(1000, 9999)}'),
+            image=kwargs.get('image', mim_binary_file.image()),
+        )
+
 
 class StampSample(models.Model):
     name = models.CharField(max_length=255)
@@ -158,10 +183,23 @@ class StampSample(models.Model):
     michel_number = models.CharField(max_length=255, null=True, blank=True)
     image = models.URLField(null=True)
 
-    objects = StampSampleManager()
+    objects = StampSampleManager().as_manager()
 
     def __str__(self):
         return f'{self.name} ({self.value}, {self.year})'
+
+
+class UserStampManager(models.QuerySet):
+    def generate(self, *, user: User, **kwargs):
+        desk = Desk.objects.get(user=user, type=DeskType.AVAILABLE)
+        return self.create(
+            sample=kwargs.get('sample', StampSample.objects.generate()),
+            custom_name=kwargs.get('custom_name'),
+            comment=kwargs.get('comment'),
+            user=user,
+            desk=kwargs.get('desk', desk),
+            allow_repeat=kwargs.get('allow_repeat', False),
+        )
 
 
 class UserStamp(models.Model):
@@ -171,6 +209,8 @@ class UserStamp(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stamps', on_delete=models.CASCADE)
     desk = models.ForeignKey(Desk, related_name='stamps', on_delete=models.PROTECT, null=True)
     allow_repeat = models.BooleanField(default=False)
+
+    objects = UserStampManager.as_manager()
 
     def __add__(self, other) -> Decimal:
         if isinstance(other, self.__class__):

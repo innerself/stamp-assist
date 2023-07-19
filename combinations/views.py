@@ -36,7 +36,7 @@ def samples_create_from_colnect_view(request):
         form = ColnectCreateForm(request.POST)
         if form.is_valid():
             for url in form.cleaned_data['urls'].split('\n'):
-                StampSample.objects.from_colnect(url.strip())
+                StampSample.objects.from_colnect_url(url.strip())
                 time.sleep(5)
 
     return HttpResponseRedirect(reverse('combinations:samples'))
