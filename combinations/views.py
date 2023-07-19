@@ -1,6 +1,7 @@
 import time
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render
 from django.urls import reverse
@@ -214,3 +215,14 @@ def combinations_view(request):
     }
 
     return render(request, 'combinations/combinations.html', context)
+
+
+@require_http_methods(['POST'])
+@login_required
+def stick_stamps_to_postcard(request):
+    UserStamp.objects.filter(
+        user=request.user,
+        desk=request.user.desks.get(type=DeskType.POSTCARD),
+    ).delete()
+
+    return HttpResponseRedirect(reverse('combinations:combinations'))

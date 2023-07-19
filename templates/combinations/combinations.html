@@ -15,7 +15,7 @@
     </div>
     <div class="row">
       <h4>Combinations</h4>
-      <div class="col-8">
+      <div class="col-8">  <!-- combinations -->
         {% if combs == None %}
           Press "Calculate" to get combinations
         {% else %}
@@ -46,9 +46,9 @@
           {% endfor %}
         {% endif %}
       </div>
-      <div class="col-4">
+      <div class="col-4">  <!-- desks -->
         <div class="container">
-          <div class="row">
+          <div class="row" id="stamps-on-postcard">  <!-- postcard -->
             <h4>On postcard</h4>
             <div class="card-group comb-group">
               {% for stamp in used_stamps %}
@@ -57,8 +57,12 @@
                 </div>
               {% endfor %}
             </div>
+            <form action="{% url 'combinations:stick_stamps' %}" method="post">
+              {% csrf_token %}
+              <button class="btn btn-success w-100" type="submit">Stick to postcard</button>
+            </form>
           </div>
-          <div class="row">
+          <div class="row" id="removed-stamps">  <!-- removed -->
             <h4>Removed</h4>
             <div class="card-group comb-group">
               {% for sample in removed_stamps %}

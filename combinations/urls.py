@@ -11,4 +11,5 @@ urlpatterns = [
     path('user-stamps/', views.user_stamps_list_view, name='user-stamps'),
     path('user-stamps/<int:stamp_id>/', views.user_stamps_edit_view, name='user-stamp-edit'),
     path('combinations/', views.combinations_view, name='combinations'),
+    path('combinations/stick/', views.stick_stamps_to_postcard, name='stick_stamps'),
 ]
