@@ -34,7 +34,6 @@ class TestCombinations(django.test.TestCase):
         UserStamp.objects.generate(user=user, sample=sample)
 
         combs = user.desk_available.combinations()
-
         assert len(combs) == 1
 
     def test_two_diff_stamps(self):
@@ -45,7 +44,6 @@ class TestCombinations(django.test.TestCase):
             UserStamp.objects.generate(user=user, sample=sample)
 
         combs = user.desk_available.combinations()
-
         assert len(combs) == 2
 
     def test_two_diff_stamps_half_value(self):
@@ -56,6 +54,28 @@ class TestCombinations(django.test.TestCase):
             UserStamp.objects.generate(user=user, sample=sample)
 
         combs = user.desk_available.combinations()
-
         assert len(combs) == 1
 
+    def test_no_combs(self):
+        user = User.objects.generate(target_value=10, max_value=10)
+
+        for _ in range(2):
+            sample = StampSample.objects.generate(value=1)
+            UserStamp.objects.generate(user=user, sample=sample)
+
+        combs = user.desk_available.combinations()
+        assert len(combs) == 0
+
+    def test_allow_repeat_in_stamps(self):
+        user = User.objects.generate(
+            target_value=10,
+            max_value=10,
+            allow_stamp_repeat=False,
+        )
+
+        sample = StampSample.objects.generate(value=5)
+        for _ in range(2):
+            UserStamp.objects.generate(user=user, sample=sample, allow_repeat=True)
+
+        combs = user.desk_available.combinations()
+        assert len(combs) == 1

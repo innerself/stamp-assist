@@ -103,6 +103,8 @@ class Desk(models.Model):
 
         print(f'User {self.user.username} requested to evaluate {total_combs} combinations')
 
+        # Remove duplicate combinations, where stamps have the same sample,
+        # but because of different ids it becomes another combination
         flt = set()
         flt_check = set()
         for index, c in enumerate(itertools.chain(*combs_to_test)):
