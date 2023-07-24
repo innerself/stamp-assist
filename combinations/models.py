@@ -135,6 +135,10 @@ class Desk(models.Model):
 class StampSampleManager(models.QuerySet):
     def from_colnect_url(self, url: str):
         """Create an instance from colnect.com URL."""
+        if self.filter(url=url).exists():
+            logger.warning(f'Sample from URL: {url} already imported')
+            return None
+
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                           'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -158,6 +162,7 @@ class StampSampleManager(models.QuerySet):
             value=int(soup.find('dt', string='Номинальная стоимость:').next_sibling.next_element.text),
             michel_number=soup.find('strong', string='Михель').next_sibling.text.strip(),
             image=ik_image.url,
+            url=url,
         )
 
     def generate(self, **kwargs):
@@ -184,6 +189,7 @@ class StampSample(models.Model):
     topics = models.JSONField(default=list)
     michel_number = models.CharField(max_length=255, null=True, blank=True)
     image = models.URLField(null=True)
+    url = models.URLField(null=True)
 
     objects = StampSampleManager().as_manager()
 
