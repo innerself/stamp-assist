@@ -6,7 +6,7 @@ from mimesis import Person, Locale
 mim_person_en = Person(locale=Locale.EN)
 
 
-class UserManager(models.QuerySet):
+class UserCustomManager(models.QuerySet):
     def generate(self, **kwargs):
         return self.create(
             username=kwargs.get('username', mim_person_en.username()),
@@ -23,7 +23,7 @@ class User(AbstractUser):
     max_value = models.DecimalField(max_digits=10, decimal_places=2, default=100)
     allow_stamp_repeat = models.BooleanField(default=False)
 
-    objects = UserManager.as_manager()
+    objects = UserCustomManager.as_manager()
 
     @property
     def calc_settings(self):

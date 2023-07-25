@@ -1,5 +1,6 @@
 import time
 from decimal import Decimal
+from logging import getLogger
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponseBadRequest
@@ -11,6 +12,8 @@ from django.views.generic import ListView
 
 from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm, UserStampEditForm
 from .models import StampSample, UserStamp, Desk, DeskType
+
+logger = getLogger()
 
 
 def index_view(request):
@@ -35,9 +38,18 @@ def samples_create_from_colnect_view(request):
     if request.method == 'POST':
         form = ColnectCreateForm(request.POST)
         if form.is_valid():
-            for url in form.cleaned_data['urls'].split('\n'):
-                StampSample.objects.from_colnect_url(url.strip())
+            urls = form.cleaned_data['urls'].split('\n')
+            existing_urls = StampSample.objects.all().values_list('url', flat=True)
+            for index, url in enumerate(urls, 1):
+                print(f'Importing {index}/{len(urls)} sample', end='\r')
+                url = url.strip()
+                if url in existing_urls:
+                    logger.warning(f'\nSample from URL: {url} already imported')
+                    continue
+
+                StampSample.objects.from_colnect_url(url)
                 time.sleep(5)
+            print('\n')
 
     return HttpResponseRedirect(reverse('combinations:samples'))
 

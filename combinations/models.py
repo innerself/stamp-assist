@@ -15,6 +15,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.text import slugify
 from imagekitio import ImageKit
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 from mimesis import Text, Locale, Datetime, Address, Finance, BinaryFile
@@ -142,7 +143,7 @@ class StampSampleManager(models.QuerySet):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                           'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/104.0.5112.79 Safari/537.36'
+                          'Chrome/104.0.5112.79 Safari/537.36',
         }
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -155,19 +156,30 @@ class StampSampleManager(models.QuerySet):
             options=ik_options,
         )
 
+        name = soup.find('span', id='name').string
+
+        if michel_tag := soup.find('strong', string='Михель'):
+            michel_number = michel_tag.next_sibling.text.strip()
+        else:
+            michel_number = None
+
         return self.create(
-            name=soup.find('span', id='name').string,
+            name=name,
+            slug=slugify(name),
             year=datetime.date.fromisoformat(soup.find('dt', string='Дата выпуска:').next_sibling.text.strip()).year,
             country=soup.find('dt', string='Страна:').next_sibling.text.strip(),
-            value=int(soup.find('dt', string='Номинальная стоимость:').next_sibling.next_element.text),
-            michel_number=soup.find('strong', string='Михель').next_sibling.text.strip(),
+            value=Decimal(
+                soup.find('dt', string='Номинальная стоимость:').next_sibling.next_element.text.replace(',', '.')),
+            michel_number=michel_number,
             image=ik_image.url,
             url=url,
         )
 
     def generate(self, **kwargs):
+        name = kwargs.get('name', mim_text_en.title())
         return self.create(
-            name=kwargs.get('name', mim_text_en.title()),
+            name=name,
+            slug=slugify(name),
             year=kwargs.get('year', mim_datetime.year()),
             country=kwargs.get('country', mim_address_en.country()),
             value=kwargs.get('value', mim_finance.price(1, 101)),
@@ -181,6 +193,7 @@ class StampSampleManager(models.QuerySet):
 
 class StampSample(models.Model):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
     year = models.PositiveSmallIntegerField()
     country = models.CharField(max_length=255)
     value = models.DecimalField(max_digits=10, decimal_places=2)
@@ -208,6 +221,16 @@ class UserStampManager(models.QuerySet):
             desk=kwargs.get('desk', desk),
             allow_repeat=kwargs.get('allow_repeat', False),
         )
+
+    def export(self) -> list[dict]:
+        return [{
+            'sample_slug': stamp.sample.slug,
+            'custom_name': stamp.custom_name,
+            'comment': stamp.comment,
+            'user_username': stamp.user.username,
+            'desk_type': stamp.desk.type,
+            'allow_repeat': stamp.allow_repeat,
+        } for stamp in self]
 
 
 class UserStamp(models.Model):

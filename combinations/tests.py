@@ -79,3 +79,18 @@ class TestCombinations(django.test.TestCase):
 
         combs = user.desk_available.combinations()
         assert len(combs) == 1
+
+
+class TestUserStamp(django.test.TestCase):
+    def test_export(self):
+        user = User.objects.generate()
+
+        stamps_num = 3
+        for _ in range(stamps_num):
+            UserStamp.objects.generate(
+                sample=StampSample.objects.generate(),
+                user=user,
+            )
+
+        export_data = UserStamp.objects.all().export()
+        assert len(export_data) == stamps_num
