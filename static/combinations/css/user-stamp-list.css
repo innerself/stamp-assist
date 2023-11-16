@@ -43,13 +43,13 @@
 
 .stamp-repeat-icon {
   display: inline-block;
-  color: gray;
+  color: rgb(128, 128, 128);
   margin-right: 0.5rem;
 }
 
 .stamp-edit-icon {
   display: inline-block;
-  color: gray;
+  color: rgb(128, 128, 128);
 }
 
 .stamp-footer {

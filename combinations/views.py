@@ -10,7 +10,8 @@ from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import ListView
 
-from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm, UserStampEditForm
+from .forms import CalcConfigForm, ColnectCreateForm, UserStampCreateForm, UserStampEditForm, \
+    UserStampAddForm
 from .models import StampSample, UserStamp, Desk, DeskType
 
 logger = getLogger()
@@ -62,6 +63,53 @@ class StampSampleColnectView(View):
     def post(self, request, *args, **kwargs):
         view = samples_create_from_colnect_view
         return view(request, *args, **kwargs)
+
+
+@login_required
+def stamp_samples_view(request):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+
+    context = {
+        'samples': StampSample.objects.all().order_by('value'),
+    }
+
+    return render(request, 'combinations/stamp-sample-list.html', context)
+
+
+def user_stamp_add_view(request, sample_id: int):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+
+    sample = StampSample.objects.get(id=sample_id)
+
+    if request.method == 'POST':
+        form = UserStampAddForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            desk = Desk.objects.get(
+                user=request.user,
+                type=DeskType.AVAILABLE,
+            )
+            for _ in range(int(data['quantity'])):
+                UserStamp.objects.create(
+                    sample=sample,
+                    custom_name=data['custom_name'],
+                    comment=data['comment'],
+                    user=request.user,
+                    desk=desk,
+                )
+
+            return HttpResponseRedirect(reverse('combinations:user-stamps'))
+
+    form = UserStampAddForm(initial={'original_name': sample.name})
+
+    context = {
+        'sample': sample,
+        'form': form,
+    }
+
+    return render(request, 'combinations/user-stamp-add.html', context)
 
 
 def user_stamps_list_view(request):

@@ -1,7 +1,8 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% load icon %}
 {% block extrahead %}
-  <link rel="stylesheet" type="text/css" href="{% static 'combinations/css/index.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'combinations/css/stamp-sample-list.css' %}">
 {% endblock extrahead %}
 {% block main %}
   <form method="post" class="form-group">
@@ -11,17 +12,21 @@
       <input type="submit" value="Save" id="colnect-submit" class="btn">
     </div>
   </form>
-  <div class="sample-cards">
-    {% for sample in stampsample_list %}
-      <div class="sample-cards__item">
-        <h4>{{ sample.name }}</h4>
-        <p>Value: {{ sample.value }}</p>
-        <p><img src="{{ sample.image }}"></p>
-      </div>
-    {% empty %}
-      <p>No samples added</p>
-    {% endfor %}
+  {#  <div class="sample-cards">#}
+  <div class="main-wrapper">
+    <div class="stamps-column">
+      {% for sample in samples %}
+        <div class="card stamp-card h-100">
+          <img src="{{ sample.image }}" class="card-img-top" alt="...">
+          <div class="card-body">
+            <div class="stamp-value-count">{{ sample.value }}&nbsp;&#8381;</div>
+            <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-add' sample.id %}">{% icon "plus-square" %}</a>
+            {#            <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>#}
+          </div>
+        </div>
+      {% empty %}
+        <p>No samples added</p>
+      {% endfor %}
+    </div>
   </div>
-  <ul>
-  </ul>
 {% endblock %}
