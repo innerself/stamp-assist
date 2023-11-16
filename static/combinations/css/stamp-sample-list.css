@@ -1,0 +1,37 @@
+.main-wrapper {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  grid-gap: 2em;
+}
+
+.stamps-column {
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto;
+  grid-gap: 2em;
+}
+
+.filter-column {
+  grid-column: 2;
+  display: grid;
+  grid-template-rows: repeat(4, min-content);
+}
+
+.stamp-card {
+  width: 16rem;
+}
+
+.stamp-value-count {
+  display: inline-block;
+  float: left;
+  font-size: large;
+}
+
+.stamp-edit-icon {
+  display: inline-block;
+  float: right;
+  padding-right: 0.4rem;
+  color: rgb(128, 128, 128);
+}
