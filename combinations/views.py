@@ -70,8 +70,9 @@ def stamp_samples_view(request):
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 
+    user_sample_ids = list(set(x.sample.id for x in request.user.stamps.all()))
     context = {
-        'samples': StampSample.objects.all().order_by('value'),
+`        'samples': StampSample.objects.all().exclude(id__in=user_sample_ids).order_by('value'),
     }
 
     return render(request, 'combinations/stamp-sample-list.html', context)

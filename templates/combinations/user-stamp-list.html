@@ -32,14 +32,14 @@
         </div>
       {% endfor %}
     </div>
-    <div class="edit-column">
-      <div class="add-cell">
-        <form method="post" class="form-group">
-          {% csrf_token %}
-          {{ form_create.as_div }}
-          <input type="submit" value="Save" class="btn">
-        </form>
-      </div>
-    </div>
+{#    <div class="edit-column">#}
+{#      <div class="add-cell">#}
+{#        <form method="post" class="form-group">#}
+{#          {% csrf_token %}#}
+{#          {{ form_create.as_div }}#}
+{#          <input type="submit" value="Save" class="btn">#}
+{#        </form>#}
+{#      </div>#}
+{#    </div>#}
   </div>
 {% endblock main %}
