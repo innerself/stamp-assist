@@ -5,7 +5,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: gunicorn stamp_assist.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn stamp_assist.wsgi:application --bind 0.0.0.0:8100
     volumes:
       - './:/usr/src/app/'
     ports:
