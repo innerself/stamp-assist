@@ -6,6 +6,8 @@ services:
       context: ./
       dockerfile: Dockerfile
     command: gunicorn stamp_assist.wsgi:application --bind 0.0.0.0:8100
+    volumes:
+      - stamp_assist_static_files:/app/staticfiles
     ports:
       - '8100:8100'
     env_file:
