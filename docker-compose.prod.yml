@@ -5,7 +5,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: gunicorn stamp_assist.wsgi:application --capture-output --bind 0.0.0.0:8100
+    command: gunicorn stamp_assist.wsgi:application --timeout 30 --capture-output --bind 0.0.0.0:8100
     volumes:
       - /home/stamp-assist/web/staticfiles:/app/staticfiles
     ports:
