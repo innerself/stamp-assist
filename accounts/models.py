@@ -1,12 +1,12 @@
 from django.apps import apps
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from mimesis import Person, Locale
 
 mim_person_en = Person(locale=Locale.EN)
 
 
-class UserCustomManager(models.QuerySet):
+class UserCustomManager(UserManager):
     def generate(self, **kwargs):
         return self.create(
             username=kwargs.get('username', mim_person_en.username()),
@@ -23,7 +23,7 @@ class User(AbstractUser):
     max_value = models.DecimalField(max_digits=10, decimal_places=2, default=100)
     allow_stamp_repeat = models.BooleanField(default=False)
 
-    objects = UserCustomManager.as_manager()
+    objects = UserCustomManager()
 
     @property
     def calc_settings(self):

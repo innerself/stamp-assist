@@ -38,7 +38,10 @@ class UserStampCreateForm(forms.Form):
         super().__init__(*args, **kwargs)
         if user is not None:
             user_sample_ids = list(set(x.sample.id for x in user.stamps.all()))
-            self.fields['sample'].queryset = StampSample.objects.all().exclude(id__in=user_sample_ids)
+            self.fields['sample'].queryset = StampSample.objects \
+                .all() \
+                .exclude(id__in=user_sample_ids) \
+                .order_by('name')
 
 
 class UserStampEditForm(forms.Form):

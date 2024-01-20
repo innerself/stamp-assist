@@ -148,7 +148,12 @@ class StampSampleManager(models.QuerySet):
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        image_url = f"https:{soup.find('div', {'class': 'item_z_pic'}).img['src']}"
+        try:
+            image_url = f"https:{soup.find('div', {'class': 'item_z_pic'}).img['src']}"
+        except AttributeError:
+            logger.debug(f'Error importing image: {url}')
+            return None
+
         ik_options = UploadFileRequestOptions(folder='/stamp-assist/')
         ik_image = imagekit.upload_file(
             image_url,
@@ -202,7 +207,7 @@ class StampSample(models.Model):
     topics = models.JSONField(default=list)
     michel_number = models.CharField(max_length=255, null=True, blank=True)
     image = models.URLField(null=True)
-    url = models.URLField(null=True)
+    url = models.URLField(null=True, max_length=500)
 
     objects = StampSampleManager().as_manager()
 
@@ -222,15 +227,31 @@ class UserStampManager(models.QuerySet):
             allow_repeat=kwargs.get('allow_repeat', False),
         )
 
-    def export(self) -> list[dict]:
+    def to_json(self) -> list[dict]:
         return [{
             'sample_slug': stamp.sample.slug,
             'custom_name': stamp.custom_name,
             'comment': stamp.comment,
-            'user_username': stamp.user.username,
+            'username': stamp.user.username,
             'desk_type': stamp.desk.type,
             'allow_repeat': stamp.allow_repeat,
         } for stamp in self]
+
+    def from_json(self, stamps_raw_data: list[dict]) -> list:
+        created_stamps = []
+        for stamp in stamps_raw_data:
+            user = User.objects.get(username=stamp['username'])
+            created_stamp = self.create(
+                sample=StampSample.objects.get(slug=stamp['sample_slug']),
+                custom_name=stamp['custom_name'],
+                comment=stamp['comment'],
+                user=user,
+                desk=Desk.objects.get(user=user, type=stamp['desk_type']),
+                allow_repeat=stamp['allow_repeat'],
+            )
+            created_stamps.append(created_stamp)
+
+        return created_stamps
 
 
 class UserStamp(models.Model):

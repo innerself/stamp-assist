@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8100
+    volumes:
+      - './:/usr/src/app/'
+    ports:
+      - '8100:8100'
+    env_file:
+      - ./.env
+
+  db:
+    image: postgres:15
+    volumes:
+      - stamp_assist_postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=stamp_assist
+      - POSTGRES_PASSWORD=stamp_assist
+      - POSTGRES_DB=stamp_assist
+
+volumes:
+  stamp_assist_postgres_data:

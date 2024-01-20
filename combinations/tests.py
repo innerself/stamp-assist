@@ -82,7 +82,7 @@ class TestCombinations(django.test.TestCase):
 
 
 class TestUserStamp(django.test.TestCase):
-    def test_export(self):
+    def test_to_json(self):
         user = User.objects.generate()
 
         stamps_num = 3
@@ -92,5 +92,26 @@ class TestUserStamp(django.test.TestCase):
                 user=user,
             )
 
-        export_data = UserStamp.objects.all().export()
+        export_data = UserStamp.objects.all().to_json()
         assert len(export_data) == stamps_num
+
+    def test_from_json(self):
+        user = User.objects.generate()
+        stamps_num = 3
+        for _ in range(stamps_num):
+            UserStamp.objects.generate(
+                sample=StampSample.objects.generate(),
+                user=user,
+            )
+
+        export_data = UserStamp.objects.all().to_json()
+        assert len(UserStamp.objects.all()) == stamps_num
+
+        UserStamp.objects.all().delete()
+        assert len(UserStamp.objects.all()) == 0
+
+        UserStamp.objects.from_json(export_data)
+
+        result_stamps = UserStamp.objects.all()
+        assert len(result_stamps) == stamps_num
+        # TODO add

@@ -7,6 +7,7 @@ app_name = 'combinations'
 urlpatterns = [
     path('', views.index_view),
     path('samples/', views.stamp_samples_view, name='samples'),
+    path('samples/add/', views.stamp_samples_add_view, name='samples-add'),
     # path('samples/', views.StampSampleColnectView.as_view(), name='samples'),
     path('samples/colnect/', views.samples_create_from_colnect_view),
     path('user-stamps/', views.user_stamps_list_view, name='user-stamps'),

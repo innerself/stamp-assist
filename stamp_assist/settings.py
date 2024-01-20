@@ -21,6 +21,11 @@ env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, 'some-key'),
     ALLOWED_HOSTS=(str, '*'),
+    PG_NAME=(str, 'stamp_assist'),
+    PG_USER=(str, 'stamp_assist'),
+    PG_PASSWORD=(str, 'stamp_assist'),
+    PG_HOST=(str, 'localhost'),
+    PG_PORT=(str, '54320'),
     IMAGE_KIT_PRIVATE_KEY=(str, 'some-key'),
     IMAGE_KIT_PUBLIC_KEY=(str, 'some-key'),
     IMAGE_KIT_ENDPOINT=(str, 'some-endpoint'),
@@ -36,7 +41,6 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
-
 
 # Application definition
 
@@ -67,8 +71,7 @@ ROOT_URLCONF = 'stamp_assist.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,17 +86,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'stamp_assist.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('PG_NAME'),
+        'USER': env('PG_USER'),
+        'PASSWORD': env('PG_PASSWORD'),
+        'HOST': env('PG_HOST'),
+        'PORT': env('PG_PORT'),
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -113,7 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -125,13 +129,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR.joinpath('static')]
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

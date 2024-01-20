@@ -70,12 +70,44 @@ def stamp_samples_view(request):
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 
+    if request.method == 'POST':
+        form = ColnectCreateForm(request.POST)
+        if form.is_valid():
+            urls = form.cleaned_data['urls'].split('\n')
+            existing_urls = StampSample.objects.all().values_list('url', flat=True)
+            for index, url in enumerate(urls, 1):
+                print(f'Importing {index}/{len(urls)} sample', end='\r')
+                url = url.strip()
+                if url in existing_urls:
+                    logger.warning(f'\nSample from URL: {url} already imported')
+                    continue
+
+                StampSample.objects.from_colnect_url(url)
+                time.sleep(5)
+            print('\n')
+
+    form = ColnectCreateForm()
+
     user_sample_ids = list(set(x.sample.id for x in request.user.stamps.all()))
     context = {
-`        'samples': StampSample.objects.all().exclude(id__in=user_sample_ids).order_by('value'),
+        'form': form,
+        'samples': StampSample.objects.all().exclude(id__in=user_sample_ids).order_by('value'),
     }
 
     return render(request, 'combinations/stamp-sample-list.html', context)
+
+
+@login_required
+def stamp_samples_add_view(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden('Only superusers can add samples')
+
+
+    form = ColnectCreateForm()
+
+    context = {'form': form}
+
+    return render(request, 'combinations/stamp-sample-create-colnect.html', context)
 
 
 def user_stamp_add_view(request, sample_id: int):
