@@ -18,6 +18,7 @@ urllib3 = "1.26.16"
 django-feather = "^0.3.0"
 mimesis = "^10.1.0"
 psycopg = "^3.1.17"
+gunicorn = "^21.2.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "stamp_assist.settings"
