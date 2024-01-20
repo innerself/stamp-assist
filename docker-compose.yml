@@ -20,9 +20,11 @@ services:
     volumes:
       - stamp_assist_postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=stamp_assist
-      - POSTGRES_PASSWORD=stamp_assist
-      - POSTGRES_DB=stamp_assist
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_NAME}
+      - POSTGRES_HOST=${PG_HOST}
+      - POSTGRES_PORT=${PG_PORT}
 
 volumes:
   stamp_assist_postgres_data:
