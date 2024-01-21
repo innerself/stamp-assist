@@ -138,7 +138,7 @@ def user_stamp_add_view(request, sample_id: int):
                     desk=desk,
                 )
 
-            return HttpResponseRedirect(reverse('combinations:user-stamp-add'))
+            return HttpResponseRedirect(reverse('combinations:samples'))
 
     form = UserStampAddForm(initial={'original_name': sample.name})
 
