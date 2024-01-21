@@ -57,5 +57,5 @@ class UserStampAddForm(forms.Form):
     original_name = forms.CharField(max_length=255, disabled=True, required=False)
     custom_name = forms.CharField(max_length=255, required=False)
     comment = forms.CharField(max_length=255, required=False)
-    quantity = forms.IntegerField(max_value=99, required=True)
+    quantity = forms.IntegerField(initial=1, max_value=99, required=True)
     allow_repeat = forms.BooleanField(initial=False, required=False)
