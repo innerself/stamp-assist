@@ -162,6 +162,9 @@ class StampSampleManager(models.QuerySet):
         )
 
         name = soup.find('span', id='name').string
+        value = Decimal(soup.find(
+            'dt', string='Номинальная стоимость:'
+        ).next_sibling.next_element.text.replace(',', '.'))
 
         if michel_tag := soup.find('strong', string='Михель'):
             michel_number = michel_tag.next_sibling.text.strip()
@@ -170,15 +173,19 @@ class StampSampleManager(models.QuerySet):
 
         return self.create(
             name=name,
-            slug=slugify(name),
+            slug=slugify(f'{name}-{value}'),
             year=datetime.date.fromisoformat(soup.find('dt', string='Дата выпуска:').next_sibling.text.strip()).year,
             country=soup.find('dt', string='Страна:').next_sibling.text.strip(),
-            value=Decimal(
-                soup.find('dt', string='Номинальная стоимость:').next_sibling.next_element.text.replace(',', '.')),
+            value=value,
             michel_number=michel_number,
             image=ik_image.url,
             url=url,
         )
+
+    def update_slugs(self):
+        for card in self.all():
+            card.slug = slugify(f'{card.name}-{card.value}')
+            card.save()
 
     def generate(self, **kwargs):
         name = kwargs.get('name', mim_text_en.title())

@@ -176,7 +176,7 @@ def user_stamps_list_view(request):
     stamps = {}
     for stamp in UserStamp.objects.filter(user=request.user):
         if stamp.sample.name not in stamps:
-            stamps[stamp.sample.name] = {
+            stamps[stamp.sample.slug] = {
                 'id': stamp.id,
                 'sample': stamp.sample,
                 'custom_name': stamp.custom_name,
@@ -184,7 +184,7 @@ def user_stamps_list_view(request):
                 'quantity': 0,
                 'allow_repeat': stamp.allow_repeat,
             }
-        stamps[stamp.sample.name]['quantity'] += 1
+        stamps[stamp.sample.slug]['quantity'] += 1
 
     context = {
         'stamps': stamps,
