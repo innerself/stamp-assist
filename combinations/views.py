@@ -1,3 +1,4 @@
+import threading
 import time
 from decimal import Decimal
 from logging import getLogger
@@ -82,7 +83,12 @@ def stamp_samples_view(request):
                     logger.warning(f'\nSample from URL: {url} already imported')
                     continue
 
-                StampSample.objects.from_colnect_url(url)
+                thread = threading.Thread(
+                    target=StampSample.objects.from_colnect_url,
+                    args=(url, )
+                )
+                thread.start()
+                thread.join()
                 time.sleep(5)
             print('\n')
 
@@ -101,7 +107,6 @@ def stamp_samples_view(request):
 def stamp_samples_add_view(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden('Only superusers can add samples')
-
 
     form = ColnectCreateForm()
 
