@@ -175,7 +175,7 @@ def user_stamps_list_view(request):
 
     stamps = {}
     for stamp in UserStamp.objects.filter(user=request.user).order_by('sample__value'):
-        if stamp.sample.name not in stamps:
+        if stamp.sample.slug not in stamps:
             stamps[stamp.sample.slug] = {
                 'id': stamp.id,
                 'sample': stamp.sample,
