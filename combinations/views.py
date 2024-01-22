@@ -174,7 +174,7 @@ def user_stamps_list_view(request):
     form = UserStampCreateForm(user=request.user)
 
     stamps = {}
-    for stamp in UserStamp.objects.filter(user=request.user).order_by('sample.value'):
+    for stamp in UserStamp.objects.filter(user=request.user).prefetch_related('sample').order_by('sample.value'):
         if stamp.sample.name not in stamps:
             stamps[stamp.sample.slug] = {
                 'id': stamp.id,
