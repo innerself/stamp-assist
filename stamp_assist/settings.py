@@ -30,6 +30,7 @@ env = environ.Env(
     IMAGE_KIT_PRIVATE_KEY=(str, 'some-key'),
     IMAGE_KIT_PUBLIC_KEY=(str, 'some-key'),
     IMAGE_KIT_ENDPOINT=(str, 'some-endpoint'),
+    IMAGE_KIT_FOLDER=(str, 'some-folder'),
 )
 env.read_env(BASE_DIR.joinpath('.env'))
 # Quick-start development settings - unsuitable for production

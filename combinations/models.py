@@ -154,7 +154,7 @@ class StampSampleManager(models.QuerySet):
             logger.debug(f'Error importing image: {url}')
             return None
 
-        ik_options = UploadFileRequestOptions(folder='/stamp-assist/')
+        ik_options = UploadFileRequestOptions(folder=env('IMAGE_KIT_FOLDER'))
         ik_image = imagekit.upload_file(
             image_url,
             file_name=Path(image_url).name,
