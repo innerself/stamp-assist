@@ -72,6 +72,8 @@ class Desk(models.Model):
         return cls.objects.get(user=user, type=DeskType.REMOVED)
 
     def combinations(self):
+        start = time.perf_counter()
+
         if self.user.allow_stamp_repeat:
             all_stamps = UserStamp.objects \
                 .filter(user=self.user) \
@@ -93,25 +95,27 @@ class Desk(models.Model):
         result_combs = []
         total_combs = 0
 
-        start = time.perf_counter()
+        t0 = time.perf_counter()
+        logger.info(f't0: {t0 - start}')
+
         for st_num in range(self.user.stamps_min, self.user.stamps_max + 1):
             total_combs += math.comb(len(all_stamps), st_num)
             combs_to_test.append(itertools.combinations(all_stamps, st_num))
 
-        print(f'User {self.user.username} requested to evaluate {total_combs} combinations')
+        logger.info(f'User {self.user.username} requested to evaluate {total_combs} combinations')
 
         # Remove duplicate combinations, where stamps have the same sample,
         # but because of different ids it becomes another combination
         flt = set()
         flt_check = set()
         for index, c in enumerate(itertools.chain(*combs_to_test)):
-            print(f'{index}/{total_combs}', end='\r')
             if (t := tuple(sorted(x.sample.name for x in c))) not in flt_check:
                 flt_check.add(t)
                 flt.add(tuple(sorted([(x.sample.name, x.id) for x in c])))
 
+        logger.info(f'{len(flt)} combinations left after filtering')
         t1 = time.perf_counter()
-        print(f't1: {t1 - start}')
+        logger.info(f't1: {t1 - t0}')
 
         stamp_ids_on_pc = UserStamp.objects \
             .filter(user=self.user, desk=Desk.desk_postcard(self.user)) \
@@ -128,7 +132,7 @@ class Desk(models.Model):
                 result_combs.append(Combination(comb_db_objs))
 
         t2 = time.perf_counter()
-        print(f't2: {t2 - t1}')
+        logger.info(f't2: {t2 - t1}')
 
         return sorted(result_combs, key=lambda x: x.sum())
 
