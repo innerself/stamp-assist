@@ -264,7 +264,8 @@ def combinations_view(request):
     if request.method == 'POST':
         if all(field in request.POST.keys() for field in CalcConfigForm.declared_fields):
             new_settings = {
-                'stamps_count': int(request.POST['stamps_count']),
+                'stamps_min': int(request.POST['stamps_min']),
+                'stamps_max': int(request.POST['stamps_max']),
                 'target_value': Decimal(request.POST['target_value']),
                 'max_value': Decimal(request.POST['max_value']),
             }
@@ -295,8 +296,9 @@ def combinations_view(request):
                 .exclude(desk=desk) \
                 .update(desk=desk)
 
-        desk = Desk.desk_available(request.user)
-        combs = desk.combinations()
+        if 'reset' not in request.POST:
+            desk = Desk.desk_available(request.user)
+            combs = desk.combinations()
 
     request.user.refresh_from_db()
     form = CalcConfigForm(initial=request.user.calc_settings)

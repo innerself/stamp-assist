@@ -10,7 +10,8 @@ class UserCustomManager(UserManager):
     def generate(self, **kwargs):
         return self.create(
             username=kwargs.get('username', mim_person_en.username()),
-            stamps_count=kwargs.get('stamps_count', 0),
+            stamps_min=kwargs.get('stamps_min', 1),
+            stamps_max=kwargs.get('stamps_max', 3),
             target_value=kwargs.get('target_value', 10),
             max_value=kwargs.get('max_value', 30),
             allow_stamp_repeat=kwargs.get('allow_stamp_repeat', False),
@@ -18,7 +19,8 @@ class UserCustomManager(UserManager):
 
 
 class User(AbstractUser):
-    stamps_count = models.IntegerField(default=2)
+    stamps_min = models.IntegerField(default=1)
+    stamps_max = models.IntegerField(default=3)
     target_value = models.DecimalField(max_digits=10, decimal_places=2, default=75)
     max_value = models.DecimalField(max_digits=10, decimal_places=2, default=100)
     allow_stamp_repeat = models.BooleanField(default=False)
@@ -28,14 +30,16 @@ class User(AbstractUser):
     @property
     def calc_settings(self):
         return {
-            'stamps_count': self.stamps_count,
+            'stamps_min': self.stamps_min,
+            'stamps_max': self.stamps_max,
             'target_value': self.target_value,
             'max_value': self.max_value,
         }
 
     @calc_settings.setter
     def calc_settings(self, settings: dict):
-        self.stamps_count = settings['stamps_count']
+        self.stamps_min = settings['stamps_min']
+        self.stamps_max = settings['stamps_max']
         self.target_value = settings['target_value']
         self.max_value = settings['max_value']
 

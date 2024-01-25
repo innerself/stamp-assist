@@ -94,13 +94,9 @@ class Desk(models.Model):
         total_combs = 0
 
         start = time.perf_counter()
-        if self.user.stamps_count == 0:
-            for st_num in range(1, 6):
-                total_combs += math.comb(len(all_stamps), st_num)
-                combs_to_test.append(itertools.combinations(all_stamps, st_num))
-        else:
-            total_combs += math.comb(len(all_stamps), self.user.stamps_count)
-            combs_to_test.append(itertools.combinations(all_stamps, self.user.stamps_count))
+        for st_num in range(self.user.stamps_min, self.user.stamps_max + 1):
+            total_combs += math.comb(len(all_stamps), st_num)
+            combs_to_test.append(itertools.combinations(all_stamps, st_num))
 
         print(f'User {self.user.username} requested to evaluate {total_combs} combinations')
 
@@ -114,7 +110,8 @@ class Desk(models.Model):
                 flt_check.add(t)
                 flt.add(tuple(sorted([(x.sample.name, x.id) for x in c])))
 
-        print(f't1: {time.perf_counter() - start}')
+        t1 = time.perf_counter()
+        print(f't1: {t1 - start}')
 
         stamp_ids_on_pc = UserStamp.objects \
             .filter(user=self.user, desk=Desk.desk_postcard(self.user)) \
@@ -129,6 +126,9 @@ class Desk(models.Model):
             value_applies = self.user.target_value <= sum(comb_db_objs) <= self.user.max_value
             if value_applies:
                 result_combs.append(Combination(comb_db_objs))
+
+        t2 = time.perf_counter()
+        print(f't2: {t2 - t1}')
 
         return sorted(result_combs, key=lambda x: x.sum())
 
