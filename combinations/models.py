@@ -120,7 +120,10 @@ class Desk(models.Model):
         stamp_ids_on_pc = UserStamp.objects \
             .filter(user=self.user, desk=Desk.desk_postcard(self.user)) \
             .values_list('id', flat=True)
-        for index, comb_to_test in enumerate(flt):
+        for index, comb_to_test in enumerate(sorted(flt, key=len)):
+            if len(result_combs) >= env('COMBINATION_LIMIT'):
+                break
+
             comb_ids = [x[1] for x in comb_to_test]
 
             if stamp_ids_on_pc and not set(stamp_ids_on_pc).issubset(comb_ids):
