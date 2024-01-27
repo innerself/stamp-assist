@@ -75,9 +75,11 @@ class Desk(models.Model):
         start = time.perf_counter()
 
         if self.user.allow_stamp_repeat:
-            all_stamps = UserStamp.objects \
-                .filter(user=self.user) \
+            all_stamps = list(
+                UserStamp.objects
+                .filter(user=self.user)
                 .exclude(desk=self.desk_removed(self.user))
+            )
         else:
             all_stamps = []
             added_samples = []
@@ -92,7 +94,6 @@ class Desk(models.Model):
                     added_samples.append(stamp.sample)
 
         combs_to_test = []
-        result_combs = []
         total_combs = 0
 
         t0 = time.perf_counter()
@@ -104,38 +105,23 @@ class Desk(models.Model):
 
         logger.info(f'User {self.user.username} requested to evaluate {total_combs} combinations')
 
-        # Remove duplicate combinations, where stamps have the same sample,
-        # but because of different ids it becomes another combination
-        flt = set()
-        flt_check = set()
-        for index, c in enumerate(itertools.chain(*combs_to_test)):
-            if (t := tuple(sorted(x.sample.name for x in c))) not in flt_check:
-                flt_check.add(t)
-                flt.add(tuple(sorted([(x.sample.name, x.id) for x in c])))
+        filtered_by_value = [
+            comb for comb in itertools.chain(*combs_to_test)
+            if self.user.target_value <= sum(stamp.sample.value for stamp in comb) <= self.user.max_value
+        ]
 
-        logger.info(f'{len(flt)} combinations left after filtering')
+        added_combs = set()
+        result_combs = []
+        for comb in filtered_by_value:
+            comb_string = tuple(sorted(str(stamp) for stamp in comb))
+            if comb_string not in added_combs:
+                result_combs.append(Combination(comb))
+                added_combs.add(comb_string)
+
         t1 = time.perf_counter()
-        logger.info(f't1: {t1 - t0}')
-
-        stamp_ids_on_pc = UserStamp.objects \
-            .filter(user=self.user, desk=Desk.desk_postcard(self.user)) \
-            .values_list('id', flat=True)
-        for index, comb_to_test in enumerate(sorted(flt, key=len)):
-            if len(result_combs) >= env('COMBINATION_LIMIT'):
-                break
-
-            comb_ids = [x[1] for x in comb_to_test]
-
-            if stamp_ids_on_pc and not set(stamp_ids_on_pc).issubset(comb_ids):
-                continue
-
-            comb_db_objs = [x for x in all_stamps if x.id in comb_ids]
-            value_applies = self.user.target_value <= sum(comb_db_objs) <= self.user.max_value
-            if value_applies:
-                result_combs.append(Combination(comb_db_objs))
-
-        t2 = time.perf_counter()
-        logger.info(f't2: {t2 - t1}')
+        total_time = t1 - t0
+        logger.info(f'Resulting in {len(result_combs)} combinations')
+        logger.info(f'Total time is: {total_time}')
 
         return sorted(result_combs, key=lambda x: x.sum())
 
