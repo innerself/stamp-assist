@@ -96,14 +96,13 @@ class Desk(models.Model):
         combs_to_test = []
         total_combs = 0
 
-        t0 = time.perf_counter()
-        logger.info(f't0: {t0 - start}')
-
         for st_num in range(self.user.stamps_min, self.user.stamps_max + 1):
             total_combs += math.comb(len(all_stamps), st_num)
             combs_to_test.append(itertools.combinations(all_stamps, st_num))
 
         logger.info(f'User {self.user.username} requested to evaluate {total_combs} combinations')
+        t0 = time.perf_counter()
+        logger.info(f'Preparation time: {t0 - start}')
 
         filtered_by_value = [
             comb for comb in itertools.chain(*combs_to_test)
@@ -119,9 +118,10 @@ class Desk(models.Model):
                 added_combs.add(comb_string)
 
         t1 = time.perf_counter()
-        total_time = t1 - t0
+        logger.info(f'Filtering time: {t1 - t0}')
+        logger.info(f'Total time is: {t1 - start}')
         logger.info(f'Resulting in {len(result_combs)} combinations')
-        logger.info(f'Total time is: {total_time}')
+        logger.info('= ' * 20)
 
         return sorted(result_combs, key=lambda x: x.sum())
 
