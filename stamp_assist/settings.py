@@ -21,7 +21,7 @@ env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, 'some-key'),
     ALLOWED_HOSTS=(str, '*'),
-    LOG_LEVEL=(str, 'WARNING'),
+    DJANGO_LOG_LEVEL=(str, 'WARNING'),
     PG_NAME=(str, 'stamp_assist'),
     PG_USER=(str, 'stamp_assist'),
     PG_PASSWORD=(str, 'stamp_assist'),
@@ -114,7 +114,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": env("LOG_LEVEL").upper(),
+        "level": env("DJANGO_LOG_LEVEL").upper(),
     },
 }
 
