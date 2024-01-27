@@ -8,7 +8,7 @@ packages = [{include = "stamp_assist"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 django = "^4.2.1"
-django-environ = "^0.10.0"
+django-environ = "^0.11.2"
 pytest-django = "^4.5.2"
 beautifulsoup4 = "^4.12.2"
 requests = "^2.31.0"
