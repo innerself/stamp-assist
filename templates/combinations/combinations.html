@@ -16,7 +16,9 @@
     <div class="row">
       <h4>Combinations ({{ total_combs }})</h4>
       <div class="col-md-8 comb-list">  <!-- Updated class name -->
-        {% if combs == None %}
+        {% if error %}
+          <h3>{{ error }}</h3>
+        {% elif combs == None %}
           Press "Calculate" to get combinations
         {% else %}
           {% for comb in combs %}

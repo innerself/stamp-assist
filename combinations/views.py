@@ -2,8 +2,9 @@ import threading
 import time
 from decimal import Decimal
 from logging import getLogger
-from django.shortcuts import redirect
+
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render
@@ -262,6 +263,7 @@ def user_stamps_edit_view(request, stamp_id: int):
 
 def combinations_view(request):
     combs = None
+    error = None
     if request.method == 'POST':
         if all(field in request.POST.keys() for field in CalcConfigForm.declared_fields):
             new_settings = {
@@ -301,10 +303,16 @@ def combinations_view(request):
         if 'reset' not in request.POST:
             desk = Desk.desk_available(request.user)
             desk.clear_cache()
-            combs = desk.combinations()
+            try:
+                combs = desk.combinations()
+            except ValidationError as e:
+                error = e.message
     else:
         desk = Desk.desk_available(request.user)
-        combs = desk.combinations()
+        try:
+            combs = desk.combinations()
+        except ValidationError as e:
+            error = e.message
 
     if combs:
         paginator = Paginator(combs, 10)
@@ -343,6 +351,7 @@ def combinations_view(request):
         'total_combs': len(combs) if combs else 0,
         'used_stamps': used_stamps,
         'removed_stamps': removed_stamps,
+        'error': error,
     }
 
     return render(request, 'combinations/combinations.html', context)

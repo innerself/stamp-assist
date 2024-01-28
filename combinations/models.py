@@ -14,6 +14,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -122,6 +123,12 @@ class Desk(models.Model):
         for st_num in range(self.user.stamps_min, self.user.stamps_max + 1):
             total_combs += math.comb(len(all_stamps), st_num)
             combs_to_test.append(itertools.combinations(all_stamps, st_num))
+
+        if total_combs > env('COMBINATION_LIMIT'):
+            raise ValidationError(
+                f'You have requested to calculate too much combinations ({total_combs}). '
+                f'Narrow the desired number of stamps or add a stamp from your stamp list.'
+            )
 
         logger.info(f'User {self.user.username} requested to evaluate {total_combs} combinations')
         t0 = time.perf_counter()
