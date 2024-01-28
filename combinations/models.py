@@ -126,8 +126,8 @@ class Desk(models.Model):
 
         if total_combs > env('COMBINATION_LIMIT'):
             raise ValidationError(
-                f'You have requested to calculate too much combinations ({total_combs}). '
-                f'Narrow the desired number of stamps or add a stamp from your stamp list.'
+                f'You have requested to calculate too much combinations. '
+                f'Please, narrow the desired number of stamps.'
             )
 
         logger.info(f'User {self.user.username} requested to evaluate {total_combs} combinations')
