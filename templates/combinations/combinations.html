@@ -56,6 +56,14 @@
               {% for stamp in used_stamps %}
                 <div class="card comb-card h-100">
                   <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
+                  <div class="card-body">
+                    <form method="post">
+                      {% csrf_token %}
+                      <div class="btn-group btn-group-sm text-center" role="group">
+                        <button class="btn btn-warning" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               {% endfor %}
             </div>
@@ -67,9 +75,17 @@
           <div class="row" id="removed-stamps">  <!-- removed -->
             <h4>Removed</h4>
             <div class="card-group comb-group">
-              {% for sample in removed_stamps %}
+              {% for stamp in removed_stamps %}
                 <div class="card comb-card h-100">
-                  <img class="card-img-top" src="{{ sample.image }}" alt="..."/>
+                  <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
+                  <div class="card-body">
+                    <form method="post">
+                      {% csrf_token %}
+                      <div class="btn-group btn-group-sm text-center" role="group">
+                        <button class="btn btn-warning" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               {% endfor %}
             </div>

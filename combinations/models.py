@@ -323,6 +323,12 @@ class UserStamp(models.Model):
         else:
             return f'id={self.id} value={self.sample.value}'
 
+    def to_available(self):
+        UserStamp.objects.filter(
+            user=self.user,
+            sample=self.sample,
+        ).update(desk=Desk.desk_available(self.user))
+
     def to_postcard(self):
         self.desk = Desk.desk_postcard(self.user.id)
         self.save()

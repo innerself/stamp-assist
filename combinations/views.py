@@ -287,10 +287,13 @@ def combinations_view(request):
                     .update(desk=Desk.desk_removed(request.user))
         elif stamp_id := request.POST.get('remove_stamp'):
             stamp = UserStamp.objects.get(id=stamp_id)
-            UserStamp.objects.filter(
-                user=stamp.user,
-                sample=stamp.sample,
-            ).update(desk=Desk.desk_removed(request.user))
+            if stamp.desk in (Desk.desk_postcard(request.user), Desk.desk_removed(request.user)):
+                stamp.to_available()
+            else:
+                UserStamp.objects.filter(
+                    user=stamp.user,
+                    sample=stamp.sample,
+                ).update(desk=Desk.desk_removed(request.user))
         elif 'reset' in request.POST:
             desk = Desk.desk_available(request.user)
             desk.clear_cache()
@@ -337,13 +340,17 @@ def combinations_view(request):
     )
     used_stamps_ids = [x.sample.id for x in used_stamps]
 
-    removed_stamps = set(
-        x.sample
-        for x in UserStamp.objects.filter(
+    removed_samples = []
+    removed_stamps_tmp = UserStamp.objects.filter(
             user=request.user,
             desk=Desk.desk_removed(request.user),
         ).exclude(sample_id__in=used_stamps_ids)
-    )
+
+    removed_stamps = []
+    for stamp in removed_stamps_tmp:
+        if stamp.sample not in removed_samples:
+            removed_samples.append(stamp.sample)
+            removed_stamps.append(stamp)
 
     context = {
         'form': form,
