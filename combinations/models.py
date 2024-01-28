@@ -132,9 +132,17 @@ class Desk(models.Model):
             if self.user.target_value <= sum(stamp.sample.value for stamp in comb) <= self.user.max_value
         )
 
+        stamps_to_include = set(
+            x.id for x in UserStamp.objects.filter(
+                user=self.user, desk=self.desk_postcard(self.id)
+            )
+        )
         added_combs = set()
         result_combs = []
         for comb in filtered_by_value:
+            if stamps_to_include and not set(x.id for x in comb).intersection(stamps_to_include):
+                continue
+
             comb_string = tuple(sorted(str(stamp) for stamp in comb))
             if comb_string not in added_combs:
                 result_combs.append(Combination(comb))
@@ -307,6 +315,14 @@ class UserStamp(models.Model):
             return f'{self.sample.name} ({self.sample.value})'
         else:
             return f'id={self.id} value={self.sample.value}'
+
+    def to_postcard(self):
+        self.desk = Desk.desk_postcard(self.user.id)
+        self.save()
+
+    def to_removed(self):
+        self.desk = Desk.desk_removed(self.user.id)
+        self.save()
 
 
 @receiver(post_save, sender=User)

@@ -276,8 +276,7 @@ def combinations_view(request):
 
         if stamp_id := request.POST.get('use_stamp'):
             stamp = UserStamp.objects.get(id=stamp_id)
-            stamp.desk = Desk.desk_postcard(request.user)
-            stamp.save()
+            stamp.to_postcard()
 
             if not request.user.allow_stamp_repeat and not stamp.allow_repeat:
                 UserStamp.objects \
@@ -324,16 +323,26 @@ def combinations_view(request):
     request.user.refresh_from_db()
     form = CalcConfigForm(initial=request.user.calc_settings)
 
+    used_stamps = UserStamp.objects.filter(
+        user=request.user,
+        desk=Desk.desk_postcard(request.user),
+    )
+    used_stamps_ids = [x.sample.id for x in used_stamps]
+
+    removed_stamps = set(
+        x.sample
+        for x in UserStamp.objects.filter(
+            user=request.user,
+            desk=Desk.desk_removed(request.user),
+        ).exclude(sample_id__in=used_stamps_ids)
+    )
+
     context = {
         'form': form,
         'combs': p_combs,
         'total_combs': len(combs) if combs else 0,
-        'used_stamps': UserStamp.objects.filter(
-            user=request.user, desk=Desk.desk_postcard(request.user),
-        ),
-        'removed_stamps': set(x.sample for x in UserStamp.objects.filter(
-            user=request.user, desk=Desk.desk_removed(request.user),
-        ))
+        'used_stamps': used_stamps,
+        'removed_stamps': removed_stamps,
     }
 
     return render(request, 'combinations/combinations.html', context)
