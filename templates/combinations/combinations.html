@@ -83,7 +83,9 @@
         {% endif %}
 
         <span class="current">
-          Page {{ combs.number }} of {{ combs.paginator.num_pages }}.
+          {% if combs.paginator.num_pages > 1 %}
+            Page {{ combs.number }} of {{ combs.paginator.num_pages }}.
+          {% endif %}
         </span>
 
         {% if combs.has_next %}

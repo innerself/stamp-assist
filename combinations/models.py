@@ -140,7 +140,7 @@ class Desk(models.Model):
         added_combs = set()
         result_combs = []
         for comb in filtered_by_value:
-            if stamps_to_include and not set(x.id for x in comb).intersection(stamps_to_include):
+            if stamps_to_include and not set(x.id for x in comb).issuperset(stamps_to_include):
                 continue
 
             comb_string = tuple(sorted(str(stamp) for stamp in comb))
