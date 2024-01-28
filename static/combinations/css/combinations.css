@@ -1,14 +1,39 @@
 .comb-group {
-  margin: 1.5rem auto 1.5rem auto;
+  margin: 1.5rem auto;
 }
 
 .comb-card {
   max-width: 13rem;
-  margin: auto 0.5rem auto 0.5rem;
+  margin: 0.5rem;
   background-color: transparent;
   border: none;
 }
 
 #removed-stamps {
   margin-top: 1.5rem;
+}
+
+.pagination {
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center the pagination vertically */
+}
+
+.pagination a {
+  padding: 8px 16px;
+  margin: 0 4px;
+  text-decoration: none;
+  background-color: #f1f1f1;
+  color: #555;
+}
+
+.pagination a:hover:not(.active) {
+  background-color: #ddd;
+}
+
+.pagination .active {
+  background-color: #4CAF50;
+  color: white;
 }

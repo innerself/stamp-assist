@@ -22,9 +22,10 @@
             <div class="stamp-controls">
               <form method="post" class="d-inline" action="{% url "combinations:combinations" %}">
                 {% csrf_token %}
-                <button class="btn stamp-use-icon" name="use_stamp" value="{{ stamp.id }}"><span data-feather="check-square"></span></button>
+                <button class="btn stamp-use-icon" name="use_stamp" value="{{ stamp.id }}"><span
+                    data-feather="check-square"></span></button>
               </form>
-{#              {% icon "check-square" class="stamp-use-icon" title="Start combination" %}#}
+              {#              {% icon "check-square" class="stamp-use-icon" title="Start combination" %}#}
               {% if stamp.allow_repeat %}
                 {% icon "repeat" class="stamp-repeat-icon" %}
               {% endif %}
@@ -39,14 +40,5 @@
         </div>
       {% endfor %}
     </div>
-    {#    <div class="edit-column">#}
-    {#      <div class="add-cell">#}
-    {#        <form method="post" class="form-group">#}
-    {#          {% csrf_token %}#}
-    {#          {{ form_create.as_div }}#}
-    {#          <input type="submit" value="Save" class="btn">#}
-    {#        </form>#}
-    {#      </div>#}
-    {#    </div>#}
   </div>
 {% endblock main %}

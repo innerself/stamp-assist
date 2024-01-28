@@ -5,6 +5,7 @@ import random
 import time
 from dataclasses import dataclass
 from decimal import Decimal
+from functools import wraps
 from logging import getLogger
 from pathlib import Path
 from typing import Self
@@ -12,6 +13,7 @@ from typing import Self
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -36,6 +38,22 @@ mim_datetime = Datetime()
 mim_address_en = Address(locale=Locale.EN)
 mim_finance = Finance()
 mim_binary_file = BinaryFile()
+
+
+def cache_combinations(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        cache_key = f'combinations:{args[0].id}'  # Assuming args[0] is an instance of Desk
+        cached_result = cache.get(cache_key)
+
+        if cached_result is not None:
+            return cached_result
+        else:
+            result = func(*args, **kwargs)
+            cache.set(cache_key, result, timeout=3600)  # Cache for 1 hour
+            return result
+
+    return wrapper
 
 
 class DeskType(models.TextChoices):
@@ -71,6 +89,11 @@ class Desk(models.Model):
     def desk_removed(cls, user: User) -> Self:
         return cls.objects.get(user=user, type=DeskType.REMOVED)
 
+    def clear_cache(self):
+        cache_key = f'combinations:{self.id}'  # Assuming args[0] is an instance of Desk
+        cache.delete(cache_key)
+
+    @cache_combinations
     def combinations(self):
         start = time.perf_counter()
 

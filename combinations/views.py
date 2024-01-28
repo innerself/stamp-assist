@@ -2,8 +2,9 @@ import threading
 import time
 from decimal import Decimal
 from logging import getLogger
-
+from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render
 from django.urls import reverse
@@ -291,21 +292,42 @@ def combinations_view(request):
             ).update(desk=Desk.desk_removed(request.user))
         elif 'reset' in request.POST:
             desk = Desk.desk_available(request.user)
+            desk.clear_cache()
             UserStamp.objects \
                 .filter(user=request.user) \
                 .exclude(desk=desk) \
                 .update(desk=desk)
+            # return redirect(reverse('combinations:combinations'))
 
         if 'reset' not in request.POST:
             desk = Desk.desk_available(request.user)
+            desk.clear_cache()
             combs = desk.combinations()
+    else:
+        desk = Desk.desk_available(request.user)
+        combs = desk.combinations()
+
+    if combs:
+        paginator = Paginator(combs, 10)
+        page = request.GET.get('page')
+
+        try:
+            p_combs = paginator.page(page)
+        except PageNotAnInteger:
+            p_combs = paginator.page(1)
+        except EmptyPage:
+            p_combs = paginator.page(paginator.num_pages)
+    else:
+        paginator = Paginator([], 10)
+        p_combs = paginator.page(1)
 
     request.user.refresh_from_db()
     form = CalcConfigForm(initial=request.user.calc_settings)
 
     context = {
         'form': form,
-        'combs': combs,
+        'combs': p_combs,
+        'total_combs': len(combs) if combs else 0,
         'used_stamps': UserStamp.objects.filter(
             user=request.user, desk=Desk.desk_postcard(request.user),
         ),
