@@ -1,39 +1,59 @@
 .comb-group {
-  margin: 1.5rem auto;
+    margin: 1.5rem auto;
 }
 
 .comb-card {
-  max-width: 13rem;
-  margin: 0.5rem;
-  background-color: transparent;
-  border: none;
+    max-width: 13rem;
+    margin: 0.5rem;
+    background-color: transparent;
+    border: none;
 }
 
 #removed-stamps {
-  margin-top: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .pagination {
-  margin-top: 1rem;
-  margin-bottom: 3rem;
-  display: flex;
-  justify-content: center;
-  align-items: center; /* Center the pagination vertically */
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center the pagination vertically */
 }
 
 .pagination a {
-  padding: 8px 16px;
-  margin: 0 4px;
-  text-decoration: none;
-  background-color: #f1f1f1;
-  color: #555;
+    padding: 8px 16px;
+    margin: 0 4px;
+    text-decoration: none;
+    background-color: #f1f1f1;
+    color: #555;
 }
 
 .pagination a:hover:not(.active) {
-  background-color: #ddd;
+    background-color: #ddd;
 }
 
 .pagination .active {
-  background-color: #4CAF50;
-  color: white;
+    background-color: #4CAF50;
+    color: white;
+}
+
+.card-body {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.card:hover img {
+    filter: brightness(80%);
+}
+
+.card:hover .card-body {
+    display: block;
 }

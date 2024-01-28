@@ -24,14 +24,14 @@
           {% for comb in combs %}
             <div class="card-group comb-group">
               {% for stamp in comb.stamps %}
-                <div class="card comb-card h-100">
+                <div class="card comb-card h-100 position-relative">
                   <img class="card-img-top" src="{{ stamp.sample.image }}" alt="..."/>
                   <div class="card-body">
                     <form method="post">
                       {% csrf_token %}
-                      <div class="btn-group btn-group-sm w-100" role="group">
-                        <button class="btn btn-success w-100" name="use_stamp" value="{{ stamp.id }}">Use</button>
-                        <button class="btn btn-warning w-100" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
+                      <div class="btn-group btn-group-sm text-center" role="group">
+                        <button class="btn btn-success" name="use_stamp" value="{{ stamp.id }}">Use</button>
+                        <button class="btn btn-warning" name="remove_stamp" value="{{ stamp.id }}">Remove</button>
                       </div>
                     </form>
                   </div>
@@ -86,7 +86,7 @@
 
         <span class="current">
           {% if combs.paginator.num_pages > 1 %}
-            Page {{ combs.number }} of {{ combs.paginator.num_pages }}.
+            Page {{ combs.number }} of {{ combs.paginator.num_pages }}
           {% endif %}
         </span>
 
