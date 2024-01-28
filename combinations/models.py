@@ -104,10 +104,10 @@ class Desk(models.Model):
         t0 = time.perf_counter()
         logger.info(f'Preparation time: {t0 - start}')
 
-        filtered_by_value = [
+        filtered_by_value = (
             comb for comb in itertools.chain(*combs_to_test)
             if self.user.target_value <= sum(stamp.sample.value for stamp in comb) <= self.user.max_value
-        ]
+        )
 
         added_combs = set()
         result_combs = []
