@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponseBadRequest
+from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
@@ -310,6 +311,8 @@ def combinations_view(request):
                 combs = desk.combinations()
             except ValidationError as e:
                 error = e.message
+
+        return redirect('combinations:combinations')
     else:
         desk = Desk.desk_available(request.user)
         try:
