@@ -19,8 +19,6 @@ django-feather = "^0.3.0"
 mimesis = "^10.1.0"
 psycopg = {extras = ["binary"], version = "^3.1.17"}
 gunicorn = "^21.2.0"
-
-[tool.poetry.group.dev.dependencies]
 django-debug-toolbar = "^4.2.0"
 
 [tool.pytest.ini_options]
