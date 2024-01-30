@@ -103,13 +103,15 @@ class Desk(models.Model):
                 UserStamp.objects
                 .filter(user=self.user)
                 .exclude(desk=self.desk_removed(self.user))
+                .prefetch_related('sample')
             )
         else:
             all_stamps = []
             added_samples = []
             for stamp in UserStamp.objects \
                     .filter(user=self.user) \
-                    .exclude(desk=self.desk_removed(self.user)):
+                    .exclude(desk=self.desk_removed(self.user)) \
+                    .prefetch_related('sample'):
 
                 if stamp.allow_repeat:
                     all_stamps.append(stamp)
@@ -126,8 +128,8 @@ class Desk(models.Model):
 
         if total_combs > env('COMBINATION_LIMIT'):
             raise ValidationError(
-                f'You have requested to calculate too much combinations. '
-                f'Please, narrow the desired number of stamps.'
+                'You have requested to calculate too much combinations. '
+                'Please, narrow the desired number of stamps.'
             )
 
         logger.info(f'User {self.user.username} requested to evaluate {total_combs} combinations')

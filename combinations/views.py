@@ -97,7 +97,8 @@ def stamp_samples_view(request):
 
     form = ColnectCreateForm()
 
-    user_sample_ids = list(set(x.sample.id for x in request.user.stamps.all()))
+    user_stamps = request.user.stamps.all().prefetch_related('sample')
+    user_sample_ids = list(set(x.sample.id for x in user_stamps))
     context = {
         'form': form,
         'samples': StampSample.objects.all().exclude(id__in=user_sample_ids).order_by('value'),
@@ -177,7 +178,7 @@ def user_stamps_list_view(request):
     form = UserStampCreateForm(user=request.user)
 
     stamps = {}
-    for stamp in UserStamp.objects.filter(user=request.user).order_by('sample__value'):
+    for stamp in UserStamp.objects.filter(user=request.user).prefetch_related('sample').order_by('sample__value'):
         if stamp.sample.slug not in stamps:
             stamps[stamp.sample.slug] = {
                 'id': stamp.id,

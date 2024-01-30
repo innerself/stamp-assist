@@ -37,7 +37,8 @@ class UserStampCreateForm(forms.Form):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user is not None:
-            user_sample_ids = list(set(x.sample.id for x in user.stamps.all()))
+            user_stamps = user.stamps.all().prefetch_related('sample')
+            user_sample_ids = list(set(x.sample.id for x in user_stamps))
             self.fields['sample'].queryset = StampSample.objects \
                 .all() \
                 .exclude(id__in=user_sample_ids) \
