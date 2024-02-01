@@ -23,6 +23,7 @@ env = environ.Env(
     SECRET_KEY=(str, 'some-key'),
     ALLOWED_HOSTS=(str, '*'),
     DJANGO_LOG_LEVEL=(str, 'WARNING'),
+    SENTRY_DSN=(str, 'some-dsn'),
     PG_NAME=(str, 'stamp_assist'),
     PG_USER=(str, 'stamp_assist'),
     PG_PASSWORD=(str, 'stamp_assist'),
