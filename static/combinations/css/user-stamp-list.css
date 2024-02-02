@@ -8,9 +8,9 @@
 .stamps-column {
     grid-column: 1;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     grid-template-rows: auto;
-    grid-gap: 2em;
+    grid-gap: 5em;
 }
 
 .edit-column {
@@ -25,6 +25,21 @@
 
 .stamp-card {
     width: 16rem;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    padding: 10px;
+    text-align: center;
+}
+
+.stamp-body {
+    background-color: transparent;
+}
+
+.stamp-image {
+    max-height: 150px;
+    width: auto;
+    max-width: 100%;
+    margin-top: 10px;
+    border-radius: 5px;
 }
 
 .stamp-edit-box {
@@ -34,6 +49,8 @@
 .stamp-value-count {
     display: inline-block;
     float: left;
+    font-size: 1.1rem;
+    padding-top: 0.1rem;
 }
 
 .stamp-controls {
@@ -61,4 +78,6 @@
 
 .stamp-footer {
     justify-items: stretch;
+    border-top: none;
+    background-color: transparent;
 }

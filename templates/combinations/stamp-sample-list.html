@@ -12,16 +12,25 @@
       <input type="submit" value="Save" id="colnect-submit" class="btn">
     </div>
   </form>
-  {#  <div class="sample-cards">#}
   <div class="main-wrapper">
     <div class="stamps-column">
       {% for sample in samples %}
-        <div class="card stamp-card h-100">
-          <img src="{{ sample.image }}" class="card-img-top" alt="...">
-          <div class="card-body">
+        <div class="card border-0 sample-card h-100">
+          <h5 class="card-header bg-transparent border-0">
+            {{ sample.name }}
+          </h5>
+          <div class="d-flex justify-content-center align-items-center">
+            <img src="{{ sample.image }}" class="card-img-top sample-image" alt="...">
+          </div>
+          <div class="card-body stamp-body">
+            <div class="card-text">{{ stamp.comment }}</div>
+          </div>
+          <div class="card-footer bg-transparent stamp-footer">
             <div class="stamp-value-count">{{ sample.value }}&nbsp;&#8381;</div>
-            <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-add' sample.id %}">{% icon "plus-square" %}</a>
-            {#            <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>#}
+            <div class="stamp-controls">
+              <a class="stamp-edit-icon"
+                 href="{% url 'combinations:user-stamp-add' sample.id %}">{% icon "plus-square" %}</a>
+            </div>
           </div>
         </div>
       {% empty %}

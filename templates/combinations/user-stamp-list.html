@@ -8,29 +8,32 @@
   <div class="main-wrapper">
     <div class="stamps-column">
       {% for stamp in stamps.values %}
-        <div class="card stamp-card h-100">
-          <img src="{{ stamp.sample.image }}" class="card-img-top" alt="...">
-          <div class="card-body">
-            <h5 class="card-title">
-              {% firstof stamp.custom_name stamp.sample.name %}
-            </h5>
+        <div class="card border-0 stamp-card h-100">
+          <h5 class="card-header bg-transparent border-0">
+            {% firstof stamp.custom_name stamp.sample.name %}
+          </h5>
+          <div class="d-flex justify-content-center align-items-center">
+            <img src="{{ stamp.sample.image }}" class="card-img-top stamp-image" alt="...">
+          </div>
+          <div class="card-body stamp-body">
             <div class="card-text">{{ stamp.comment }}</div>
           </div>
-          <div class="card-footer stamp-footer bg-white">
+          <div class="card-footer bg-transparent stamp-footer">
             <div
                 class="text-muted stamp-value-count">{{ stamp.sample.value }}&nbsp;&#8381;&nbsp;&times;&nbsp;{{ stamp.quantity }}</div>
             <div class="stamp-controls">
               <form method="post" class="d-inline" action="{% url "combinations:combinations" %}">
                 {% csrf_token %}
-                <button class="btn stamp-use-icon" name="use_stamp" value="{{ stamp.id }}"><span
-                    data-feather="check-square"></span></button>
+                <button class="btn stamp-use-icon" name="use_stamp" value="{{ stamp.id }}">
+                  <span data-feather="check-square"></span>
+                </button>
               </form>
-              {#              {% icon "check-square" class="stamp-use-icon" title="Start combination" %}#}
               {% if stamp.allow_repeat %}
                 {% icon "repeat" class="stamp-repeat-icon" %}
               {% endif %}
-              <a class="stamp-edit-icon"
-                 href="{% url 'combinations:user-stamp-edit' stamp.id %}">{% icon "edit-2" %}</a>
+              <a class="stamp-edit-icon" href="{% url 'combinations:user-stamp-edit' stamp.id %}">
+                {% icon "edit-2" %}
+              </a>
             </div>
           </div>
         </div>
